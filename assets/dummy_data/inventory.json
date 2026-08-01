@@ -1,0 +1,54 @@
+{
+  "transactions": [
+    {
+      "id": "txn_001",
+      "productId": "prod_001",
+      "productName": "Tomato",
+      "type": "stock_in",
+      "quantity": 500,
+      "date": "2026-08-01T08:15:00",
+      "note": "Received from AgriFresh Suppliers",
+      "user": "Admin"
+    },
+    {
+      "id": "txn_002",
+      "productId": "prod_004",
+      "productName": "Spinach",
+      "type": "stock_out",
+      "quantity": 18,
+      "date": "2026-08-01T10:30:00",
+      "note": "Sold to Fresh Mart Wholesale",
+      "user": "Admin"
+    },
+    {
+      "id": "txn_003",
+      "productId": "prod_002",
+      "productName": "Onion",
+      "type": "stock_in",
+      "quantity": 800,
+      "date": "2026-07-31T14:00:00",
+      "note": "Bulk purchase from Nashik market",
+      "user": "Admin"
+    },
+    {
+      "id": "txn_004",
+      "productId": "prod_007",
+      "productName": "Cauliflower",
+      "type": "adjustment",
+      "quantity": -5,
+      "date": "2026-07-31T09:00:00",
+      "note": "Damaged stock write-off",
+      "user": "Admin"
+    },
+    {
+      "id": "txn_005",
+      "productId": "prod_003",
+      "productName": "Potato",
+      "type": "stock_out",
+      "quantity": 200,
+      "date": "2026-07-30T16:45:00",
+      "note": "Invoice INV-2843",
+      "user": "Admin"
+    }
+  ]
+}

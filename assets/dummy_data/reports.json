@@ -1,0 +1,54 @@
+{
+  "salesReport": {
+    "totalSales": 6200000,
+    "totalInvoices": 847,
+    "avgOrderValue": 7320,
+    "monthlyData": [
+      { "month": "Jan", "sales": 4200000, "orders": 580 },
+      { "month": "Feb", "sales": 3800000, "orders": 520 },
+      { "month": "Mar", "sales": 5100000, "orders": 690 },
+      { "month": "Apr", "sales": 4600000, "orders": 620 },
+      { "month": "May", "sales": 5800000, "orders": 780 },
+      { "month": "Jun", "sales": 6200000, "orders": 830 },
+      { "month": "Jul", "sales": 5500000, "orders": 740 },
+      { "month": "Aug", "sales": 284750, "orders": 47 }
+    ]
+  },
+  "inventoryReport": {
+    "totalValue": 3450000,
+    "lowStockItems": 8,
+    "categories": [
+      { "name": "Leafy Greens", "value": 850000, "items": 12 },
+      { "name": "Root Vegetables", "value": 720000, "items": 8 },
+      { "name": "Tomatoes & Peppers", "value": 680000, "items": 6 },
+      { "name": "Onions & Garlic", "value": 540000, "items": 5 },
+      { "name": "Exotic Veg", "value": 420000, "items": 4 },
+      { "name": "Others", "value": 240000, "items": 7 }
+    ]
+  },
+  "customerReport": {
+    "totalCustomers": 156,
+    "activeCustomers": 142,
+    "totalOutstanding": 892450,
+    "topCustomers": [
+      { "name": "Fresh Mart Wholesale", "purchases": 2450000, "orders": 156 },
+      { "name": "City Super Bazaar", "purchases": 3200000, "orders": 210 },
+      { "name": "Green Valley Traders", "purchases": 1890000, "orders": 98 }
+    ]
+  },
+  "profitReport": {
+    "grossProfit": 1860000,
+    "netProfit": 970000,
+    "margin": 15.6,
+    "monthlyProfit": [
+      { "month": "Jan", "profit": 630000 },
+      { "month": "Feb", "profit": 570000 },
+      { "month": "Mar", "profit": 765000 },
+      { "month": "Apr", "profit": 690000 },
+      { "month": "May", "profit": 870000 },
+      { "month": "Jun", "profit": 930000 },
+      { "month": "Jul", "profit": 825000 },
+      { "month": "Aug", "profit": 42380 }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "suppliers": [
+    {
+      "id": "sup_001",
+      "name": "AgriFresh Suppliers",
+      "phone": "+91 99887 76655",
+      "email": "sales@agrifresh.in",
+      "gst": "29SUPAF1234Z1Z5",
+      "address": "12, APMC Yard, Yeshwanthpur",
+      "city": "Bengaluru",
+      "outstandingPayment": 185000,
+      "totalPurchases": 4500000,
+      "status": "active",
+      "purchaseHistory": [
+        { "poNo": "PO-1045", "date": "2026-08-01T00:00:00", "amount": 85000, "status": "pending" },
+        { "poNo": "PO-1038", "date": "2026-07-25T00:00:00", "amount": 100000, "status": "paid" }
+      ]
+    },
+    {
+      "id": "sup_002",
+      "name": "Nashik Onion Traders",
+      "phone": "+91 88776 65544",
+      "email": "orders@nashikonion.com",
+      "gst": "27SUPNO5678Z2Z6",
+      "address": "45, Lasalgaon Market",
+      "city": "Nashik",
+      "outstandingPayment": 0,
+      "totalPurchases": 2800000,
+      "status": "active",
+      "purchaseHistory": [
+        { "poNo": "PO-1042", "date": "2026-07-31T00:00:00", "amount": 176000, "status": "paid" }
+      ]
+    },
+    {
+      "id": "sup_003",
+      "name": "Ooty Farm Fresh",
+      "phone": "+91 77665 54433",
+      "email": "supply@ootyfarm.in",
+      "gst": "33SUPOF9012Z3Z7",
+      "address": "78, Nilgiri Hills Road",
+      "city": "Ooty",
+      "outstandingPayment": 42000,
+      "totalPurchases": 890000,
+      "status": "active",
+      "purchaseHistory": [
+        { "poNo": "PO-1035", "date": "2026-07-28T00:00:00", "amount": 42000, "status": "pending" }
+      ]
+    },
+    {
+      "id": "sup_004",
+      "name": "GreenLeaf Exotics",
+      "phone": "+91 66554 43322",
+      "email": "info@greenleafexotics.in",
+      "gst": "29SUPGL3456Z4Z8",
+      "address": "3, Export Zone, Electronic City",
+      "city": "Bengaluru",
+      "outstandingPayment": 68000,
+      "totalPurchases": 1200000,
+      "status": "active",
+      "purchaseHistory": [
+        { "poNo": "PO-1040", "date": "2026-07-29T00:00:00", "amount": 68000, "status": "pending" }
+      ]
+    }
+  ]
+}

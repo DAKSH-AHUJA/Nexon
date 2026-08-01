@@ -1,0 +1,168 @@
+{
+  "stats": {
+    "todaySales": 284750,
+    "todayProfit": 42380,
+    "todayCash": 156200,
+    "outstandingAmount": 892450,
+    "inventoryValue": 3450000,
+    "todayOrders": 47,
+    "lowStockAlerts": 8
+  },
+  "monthlySales": [
+    { "month": "Jan", "sales": 4200000, "profit": 630000 },
+    { "month": "Feb", "sales": 3800000, "profit": 570000 },
+    { "month": "Mar", "sales": 5100000, "profit": 765000 },
+    { "month": "Apr", "sales": 4600000, "profit": 690000 },
+    { "month": "May", "sales": 5800000, "profit": 870000 },
+    { "month": "Jun", "sales": 6200000, "profit": 930000 },
+    { "month": "Jul", "sales": 5500000, "profit": 825000 },
+    { "month": "Aug", "sales": 6800000, "profit": 1020000 }
+  ],
+  "inventoryByCategory": [
+    { "category": "Leafy Greens", "value": 850000, "percentage": 24.6 },
+    { "category": "Root Vegetables", "value": 720000, "percentage": 20.9 },
+    { "category": "Tomatoes & Peppers", "value": 680000, "percentage": 19.7 },
+    { "category": "Onions & Garlic", "value": 540000, "percentage": 15.7 },
+    { "category": "Exotic Veg", "value": 420000, "percentage": 12.2 },
+    { "category": "Others", "value": 240000, "percentage": 7.0 }
+  ],
+  "recentActivity": [
+    {
+      "id": "act_001",
+      "type": "sale",
+      "title": "Invoice #INV-2847 created",
+      "description": "Fresh Mart Wholesale — ₹45,200",
+      "timestamp": "2026-08-01T10:32:00",
+      "icon": "receipt"
+    },
+    {
+      "id": "act_002",
+      "type": "payment",
+      "title": "Payment received",
+      "description": "Green Valley Traders — ₹28,500",
+      "timestamp": "2026-08-01T09:45:00",
+      "icon": "payment"
+    },
+    {
+      "id": "act_003",
+      "type": "stock",
+      "title": "Stock received",
+      "description": "Tomato — 500 kg from AgriFresh Suppliers",
+      "timestamp": "2026-08-01T08:15:00",
+      "icon": "inventory"
+    },
+    {
+      "id": "act_004",
+      "type": "alert",
+      "title": "Low stock alert",
+      "description": "Spinach below minimum level (12 kg remaining)",
+      "timestamp": "2026-08-01T07:30:00",
+      "icon": "warning"
+    },
+    {
+      "id": "act_005",
+      "type": "customer",
+      "title": "New customer added",
+      "description": "Sunrise Hotel & Restaurant",
+      "timestamp": "2026-07-31T18:20:00",
+      "icon": "person_add"
+    }
+  ],
+  "topCustomers": [
+    {
+      "id": "cust_001",
+      "name": "Fresh Mart Wholesale",
+      "totalPurchases": 2450000,
+      "outstanding": 125000,
+      "orders": 156
+    },
+    {
+      "id": "cust_002",
+      "name": "Green Valley Traders",
+      "totalPurchases": 1890000,
+      "outstanding": 85000,
+      "orders": 124
+    },
+    {
+      "id": "cust_003",
+      "name": "Sunrise Hotel & Restaurant",
+      "totalPurchases": 1560000,
+      "outstanding": 42000,
+      "orders": 98
+    },
+    {
+      "id": "cust_004",
+      "name": "City Supermarket Chain",
+      "totalPurchases": 1340000,
+      "outstanding": 198000,
+      "orders": 87
+    },
+    {
+      "id": "cust_005",
+      "name": "Organic Foods Pvt Ltd",
+      "totalPurchases": 980000,
+      "outstanding": 0,
+      "orders": 65
+    }
+  ],
+  "recentBills": [
+    {
+      "id": "bill_001",
+      "invoiceNumber": "INV-2847",
+      "customerName": "Fresh Mart Wholesale",
+      "amount": 45200,
+      "status": "paid",
+      "date": "2026-08-01"
+    },
+    {
+      "id": "bill_002",
+      "invoiceNumber": "INV-2846",
+      "customerName": "Green Valley Traders",
+      "amount": 32800,
+      "status": "pending",
+      "date": "2026-08-01"
+    },
+    {
+      "id": "bill_003",
+      "invoiceNumber": "INV-2845",
+      "customerName": "Sunrise Hotel & Restaurant",
+      "amount": 18500,
+      "status": "paid",
+      "date": "2026-07-31"
+    },
+    {
+      "id": "bill_004",
+      "invoiceNumber": "INV-2844",
+      "customerName": "City Supermarket Chain",
+      "amount": 67200,
+      "status": "overdue",
+      "date": "2026-07-30"
+    }
+  ],
+  "recentPayments": [
+    {
+      "id": "pay_001",
+      "reference": "RCP-1847",
+      "customerName": "Fresh Mart Wholesale",
+      "amount": 28500,
+      "mode": "UPI",
+      "date": "2026-08-01"
+    },
+    {
+      "id": "pay_002",
+      "reference": "RCP-1846",
+      "customerName": "Green Valley Traders",
+      "amount": 42000,
+      "mode": "Bank Transfer",
+      "date": "2026-08-01"
+    },
+    {
+      "id": "pay_003",
+      "reference": "RCP-1845",
+      "customerName": "Organic Foods Pvt Ltd",
+      "amount": 15600,
+      "mode": "Cash",
+      "date": "2026-07-31"
+    }
+  ]
+}

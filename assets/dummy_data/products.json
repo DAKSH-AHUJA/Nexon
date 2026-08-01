@@ -1,0 +1,114 @@
+{
+  "products": [
+    {
+      "id": "prod_001",
+      "name": "Tomato",
+      "category": "Tomatoes & Peppers",
+      "unit": "kg",
+      "currentStock": 850,
+      "purchasePrice": 28,
+      "sellingPrice": 35,
+      "minimumStock": 200,
+      "description": "Fresh local tomatoes, Grade A"
+    },
+    {
+      "id": "prod_002",
+      "name": "Onion",
+      "category": "Onions & Garlic",
+      "unit": "kg",
+      "currentStock": 1200,
+      "purchasePrice": 22,
+      "sellingPrice": 28,
+      "minimumStock": 300,
+      "description": "Nashik red onions"
+    },
+    {
+      "id": "prod_003",
+      "name": "Potato",
+      "category": "Root Vegetables",
+      "unit": "kg",
+      "currentStock": 950,
+      "purchasePrice": 18,
+      "sellingPrice": 24,
+      "minimumStock": 250,
+      "description": "Premium table potatoes"
+    },
+    {
+      "id": "prod_004",
+      "name": "Spinach",
+      "category": "Leafy Greens",
+      "unit": "kg",
+      "currentStock": 12,
+      "purchasePrice": 35,
+      "sellingPrice": 45,
+      "minimumStock": 30,
+      "description": "Fresh palak, daily harvest"
+    },
+    {
+      "id": "prod_005",
+      "name": "Carrot",
+      "category": "Root Vegetables",
+      "unit": "kg",
+      "currentStock": 420,
+      "purchasePrice": 32,
+      "sellingPrice": 40,
+      "minimumStock": 100,
+      "description": "Ooty carrots"
+    },
+    {
+      "id": "prod_006",
+      "name": "Capsicum",
+      "category": "Tomatoes & Peppers",
+      "unit": "kg",
+      "currentStock": 180,
+      "purchasePrice": 55,
+      "sellingPrice": 68,
+      "minimumStock": 50,
+      "description": "Green and colored capsicum mix"
+    },
+    {
+      "id": "prod_007",
+      "name": "Cauliflower",
+      "category": "Others",
+      "unit": "kg",
+      "currentStock": 65,
+      "purchasePrice": 38,
+      "sellingPrice": 48,
+      "minimumStock": 80,
+      "description": "Medium size cauliflower heads"
+    },
+    {
+      "id": "prod_008",
+      "name": "Broccoli",
+      "category": "Exotic Veg",
+      "unit": "kg",
+      "currentStock": 45,
+      "purchasePrice": 85,
+      "sellingPrice": 105,
+      "minimumStock": 20,
+      "description": "Fresh imported broccoli"
+    },
+    {
+      "id": "prod_009",
+      "name": "Garlic",
+      "category": "Onions & Garlic",
+      "unit": "kg",
+      "currentStock": 220,
+      "purchasePrice": 120,
+      "sellingPrice": 145,
+      "minimumStock": 50,
+      "description": "Premium garlic bulbs"
+    },
+    {
+      "id": "prod_010",
+      "name": "Coriander",
+      "category": "Leafy Greens",
+      "unit": "bundle",
+      "currentStock": 350,
+      "purchasePrice": 8,
+      "sellingPrice": 12,
+      "minimumStock": 100,
+      "description": "Fresh coriander bunches"
+    }
+  ]
+}

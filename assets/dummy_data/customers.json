@@ -1,0 +1,113 @@
+{
+  "customers": [
+    {
+      "id": "cust_001",
+      "name": "Fresh Mart Wholesale",
+      "phone": "+91 98765 43210",
+      "email": "orders@freshmart.in",
+      "gst": "29AABCF1234Z1Z5",
+      "address": "42, Market Road, KR Puram",
+      "city": "Bengaluru",
+      "outstandingBalance": 125000,
+      "totalPurchases": 2450000,
+      "status": "active",
+      "createdAt": "2024-03-15T00:00:00",
+      "ledger": [
+        { "date": "2026-07-28T00:00:00", "description": "Invoice INV-2840", "debit": 45200, "credit": 0, "balance": 125000 },
+        { "date": "2026-07-25T00:00:00", "description": "Payment received", "debit": 0, "credit": 28500, "balance": 79800 }
+      ],
+      "purchaseHistory": [
+        { "invoiceNo": "INV-2847", "date": "2026-08-01T00:00:00", "amount": 45200, "status": "pending" },
+        { "invoiceNo": "INV-2832", "date": "2026-07-28T00:00:00", "amount": 38500, "status": "paid" }
+      ]
+    },
+    {
+      "id": "cust_002",
+      "name": "Green Valley Traders",
+      "phone": "+91 87654 32109",
+      "email": "purchase@greenvalley.com",
+      "gst": "29BBBCG5678Z2Z6",
+      "address": "15, Industrial Area, Whitefield",
+      "city": "Bengaluru",
+      "outstandingBalance": 85000,
+      "totalPurchases": 1890000,
+      "status": "active",
+      "createdAt": "2024-05-20T00:00:00",
+      "ledger": [
+        { "date": "2026-07-30T00:00:00", "description": "Invoice INV-2845", "debit": 85000, "credit": 0, "balance": 85000 }
+      ],
+      "purchaseHistory": [
+        { "invoiceNo": "INV-2845", "date": "2026-07-30T00:00:00", "amount": 85000, "status": "pending" }
+      ]
+    },
+    {
+      "id": "cust_003",
+      "name": "Sunrise Hotel & Restaurant",
+      "phone": "+91 76543 21098",
+      "email": "procurement@sunrisehotel.in",
+      "gst": "29CCCDH9012Z3Z7",
+      "address": "88, MG Road",
+      "city": "Bengaluru",
+      "outstandingBalance": 0,
+      "totalPurchases": 980000,
+      "status": "active",
+      "createdAt": "2025-01-10T00:00:00",
+      "ledger": [],
+      "purchaseHistory": [
+        { "invoiceNo": "INV-2820", "date": "2026-07-25T00:00:00", "amount": 22400, "status": "paid" }
+      ]
+    },
+    {
+      "id": "cust_004",
+      "name": "City Super Bazaar",
+      "phone": "+91 65432 10987",
+      "email": "supply@citysuper.in",
+      "gst": "29DDDEI3456Z4Z8",
+      "address": "23, Commercial Street",
+      "city": "Bengaluru",
+      "outstandingBalance": 210000,
+      "totalPurchases": 3200000,
+      "status": "active",
+      "createdAt": "2023-08-05T00:00:00",
+      "ledger": [
+        { "date": "2026-07-29T00:00:00", "description": "Invoice INV-2843", "debit": 98000, "credit": 0, "balance": 210000 }
+      ],
+      "purchaseHistory": [
+        { "invoiceNo": "INV-2843", "date": "2026-07-29T00:00:00", "amount": 98000, "status": "pending" },
+        { "invoiceNo": "INV-2810", "date": "2026-07-20T00:00:00", "amount": 112000, "status": "pending" }
+      ]
+    },
+    {
+      "id": "cust_005",
+      "name": "Organic Kitchen Co.",
+      "phone": "+91 54321 09876",
+      "email": "hello@organickitchen.in",
+      "gst": "29EEEEF7890Z5Z9",
+      "address": "7, Koramangala 5th Block",
+      "city": "Bengaluru",
+      "outstandingBalance": 32000,
+      "totalPurchases": 560000,
+      "status": "active",
+      "createdAt": "2025-06-12T00:00:00",
+      "ledger": [],
+      "purchaseHistory": [
+        { "invoiceNo": "INV-2838", "date": "2026-07-27T00:00:00", "amount": 32000, "status": "pending" }
+      ]
+    },
+    {
+      "id": "cust_006",
+      "name": "Metro Food Services",
+      "phone": "+91 43210 98765",
+      "email": "billing@metrofood.in",
+      "gst": "29FFFFG1234Z6Z0",
+      "address": "56, Hosur Road",
+      "city": "Bengaluru",
+      "outstandingBalance": 0,
+      "totalPurchases": 1450000,
+      "status": "inactive",
+      "createdAt": "2024-11-01T00:00:00",
+      "ledger": [],
+      "purchaseHistory": []
+    }
+  ]
+}

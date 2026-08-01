@@ -1,0 +1,30 @@
+{
+  "expenses": [
+    { "id": "exp_001", "category": "Transport", "description": "Delivery van fuel", "amount": 8500, "date": "2026-08-01T00:00:00", "paymentMode": "cash" },
+    { "id": "exp_002", "category": "Labour", "description": "Loading staff wages", "amount": 12000, "date": "2026-07-31T00:00:00", "paymentMode": "cash" },
+    { "id": "exp_003", "category": "Utilities", "description": "Cold storage electricity", "amount": 24500, "date": "2026-07-30T00:00:00", "paymentMode": "bank" },
+    { "id": "exp_004", "category": "Rent", "description": "Warehouse rent - August", "amount": 75000, "date": "2026-07-28T00:00:00", "paymentMode": "bank" },
+    { "id": "exp_005", "category": "Maintenance", "description": "Refrigeration unit service", "amount": 6500, "date": "2026-07-25T00:00:00", "paymentMode": "cash" }
+  ],
+  "payments": [
+    { "id": "pay_001", "type": "customer_receipt", "party": "Green Valley Traders", "amount": 28500, "date": "2026-08-01T09:45:00", "mode": "UPI" },
+    { "id": "pay_002", "type": "supplier_payment", "party": "Nashik Onion Traders", "amount": 176000, "date": "2026-07-31T16:00:00", "mode": "Bank Transfer" },
+    { "id": "pay_003", "type": "customer_receipt", "party": "Sunrise Hotel", "amount": 22400, "date": "2026-07-25T14:30:00", "mode": "Cash" }
+  ],
+  "cashBook": {
+    "openingBalance": 125000,
+    "totalIn": 284750,
+    "totalOut": 128550,
+    "closingBalance": 281200
+  },
+  "bankAccounts": [
+    { "name": "HDFC Current A/C", "balance": 1850000, "accountNo": "****4521" },
+    { "name": "ICICI Savings A/C", "balance": 420000, "accountNo": "****7832" }
+  ],
+  "profitSummary": {
+    "revenue": 6200000,
+    "cogs": 4340000,
+    "expenses": 890000,
+    "netProfit": 970000
+  }
+}
