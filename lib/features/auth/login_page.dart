@@ -21,8 +21,8 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController(text: 'rajesh');
-  final _passwordController = TextEditingController(text: '12345');
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -355,14 +355,6 @@ class _LoginForm extends StatelessWidget {
                   : const Text('Sign In'),
             ),
           ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.05),
-          const SizedBox(height: 24),
-          Center(
-            child: Text(
-              'Rajesh Trading Company: username rajesh, password 12345',
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ),
         ],
       ),
     );

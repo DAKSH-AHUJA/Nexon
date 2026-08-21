@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CompanyAccount {
@@ -5,7 +8,7 @@ class CompanyAccount {
     required this.id,
     required this.name,
     required this.accountCode,
-    required this.password,
+    required this.passwordDigest,
     required this.businessType,
     required this.gst,
   });
@@ -13,7 +16,7 @@ class CompanyAccount {
   final String id;
   final String name;
   final String accountCode;
-  final String password;
+  final String passwordDigest;
   final String businessType;
   final String gst;
 }
@@ -48,7 +51,8 @@ const companyAccounts = [
     id: 'rajesh-trading-company',
     name: 'Rajesh Trading Company',
     accountCode: 'rajesh',
-    password: '12345',
+    passwordDigest:
+        '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5',
     businessType: 'Wholesale Vegetable Trading',
     gst: 'GSTIN not configured',
   ),
@@ -56,7 +60,8 @@ const companyAccounts = [
     id: 'fresh-mart-wholesale',
     name: 'Fresh Mart Wholesale',
     accountCode: 'freshmart',
-    password: 'demo123',
+    passwordDigest:
+        'd3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791',
     businessType: 'Vegetable Wholesale Buyer',
     gst: '29AABCF1234Z1Z5',
   ),
@@ -64,7 +69,8 @@ const companyAccounts = [
     id: 'city-super-bazaar',
     name: 'City Super Bazaar',
     accountCode: 'citybazaar',
-    password: 'demo123',
+    passwordDigest:
+        'd3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791',
     businessType: 'Retail Grocery Chain',
     gst: '29DDDEI3456Z4Z8',
   ),
@@ -81,8 +87,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return account.accountCode.toLowerCase() == normalizedCode ||
           account.name.toLowerCase() == normalizedCode;
     }).firstOrNull;
+    final passwordDigest = sha256.convert(utf8.encode(password)).toString();
 
-    if (company == null || company.password != password) {
+    if (company == null ||
+        !_constantTimeEquals(passwordDigest, company.passwordDigest)) {
       state =
           const AuthState(errorMessage: 'Invalid company account or password.');
       return false;
@@ -93,6 +101,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   void logout() => state = const AuthState();
+}
+
+bool _constantTimeEquals(String left, String right) {
+  if (left.length != right.length) return false;
+
+  var difference = 0;
+  for (var i = 0; i < left.length; i++) {
+    difference |= left.codeUnitAt(i) ^ right.codeUnitAt(i);
+  }
+  return difference == 0;
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {

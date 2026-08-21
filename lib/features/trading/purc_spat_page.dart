@@ -1,115 +1,36 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_context.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/page_header.dart';
+import '../../domain/calculators/trading_calculator.dart';
+import '../../domain/models/purchase_lot.dart';
+import '../../domain/models/rate_unit.dart';
+import '../../domain/models/sale_line.dart';
+import '../../domain/money.dart';
+import '../../services/purc_spat_provider.dart';
 
-class PurcSpatPage extends StatefulWidget {
+class PurcSpatPage extends ConsumerStatefulWidget {
   const PurcSpatPage({super.key});
 
   @override
-  State<PurcSpatPage> createState() => _PurcSpatPageState();
+  ConsumerState<PurcSpatPage> createState() => _PurcSpatPageState();
 }
 
-class _PurcSpatPageState extends State<PurcSpatPage> {
+class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
   final _purchaseScroll = ScrollController();
   final _salesScroll = ScrollController();
   final _purchaseFocus = FocusNode(debugLabel: 'Purchase truck list');
   final _salesFocus = FocusNode(debugLabel: 'Customer sale list');
 
-  final List<_PurchaseLot> _lots = [
-    _PurchaseLot(
-      srNo: 1075,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'MUNGNA FALLI',
-      bags: 10,
-      totalCarets: 10,
-      sales: [
-        _SaleLine(
-          billNo: 1,
-          date: DateTime(2026, 8, 6),
-          partyName: 'KOMAL BALLU GANJ GONDIA',
-          bags: 1,
-          weight: 46,
-          rate: 50,
-          unit: '1KG',
-        ),
-        _SaleLine(
-          billNo: 2,
-          date: DateTime(2026, 8, 6),
-          partyName: 'BABA SOHAN GONDIA',
-          bags: 3,
-          weight: 142,
-          rate: 50,
-          unit: '1KG',
-        ),
-        _SaleLine(
-          billNo: 3,
-          date: DateTime(2026, 8, 6),
-          partyName: 'SOHAN BAHE KATI 9421247',
-          bags: 5,
-          weight: 238,
-          rate: 45,
-          unit: '1KG',
-        ),
-        _SaleLine(
-          billNo: 4,
-          date: DateTime(2026, 8, 6),
-          partyName: 'LAKHAN RKS GANJ 8888450',
-          bags: 1,
-          weight: 48,
-          rate: 47,
-          unit: '1KG',
-        ),
-      ],
-    ),
-    _PurchaseLot(
-      srNo: 1076,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'PATTAGOBHI',
-      bags: 25,
-      totalCarets: 0,
-      sales: const [],
-    ),
-    _PurchaseLot(
-      srNo: 1077,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'KATWAL',
-      bags: 40,
-      totalCarets: 0,
-      sales: const [],
-    ),
-    _PurchaseLot(
-      srNo: 1078,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'SHIMLA MIRCHI',
-      bags: 10,
-      totalCarets: 0,
-      sales: const [],
-    ),
-    _PurchaseLot(
-      srNo: 1079,
-      date: DateTime(2026, 8, 6),
-      partyName: 'VICKY NANDU ND',
-      item: 'FOOL GOBHI',
-      bags: 20,
-      totalCarets: 10,
-      sales: const [],
-    ),
-  ];
-
   int _selectedLotIndex = 0;
   int _selectedSaleIndex = 0;
   bool _salesAreaActive = false;
-
-  _PurchaseLot get _selectedLot => _lots[_selectedLotIndex];
 
   @override
   void initState() {
@@ -128,22 +49,31 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
     super.dispose();
   }
 
+  List<PurchaseLot> get _lots => ref.read(purcSpatProvider);
+
+  PurchaseLot? get _selectedLot {
+    final lots = _lots;
+    if (lots.isEmpty) return null;
+    return lots[_selectedLotIndex.clamp(0, lots.length - 1)];
+  }
+
   void _move(int delta) {
+    final lot = _selectedLot;
+    if (lot == null) return;
+
     if (_salesAreaActive) {
-      final sales = _selectedLot.sales;
+      final sales = lot.sales;
       if (sales.isEmpty) {
         if (delta > 0) _addSale();
         return;
       }
-      if (delta > 0 && _selectedSaleIndex == sales.length - 1) {
+      if (delta > 0 && _selectedSaleIndex >= sales.length - 1) {
         _addSale();
         return;
       }
       setState(() {
-        _selectedSaleIndex = (_selectedSaleIndex + delta).clamp(
-          0,
-          sales.length - 1,
-        );
+        _selectedSaleIndex =
+            (_selectedSaleIndex + delta).clamp(0, sales.length - 1);
       });
       _scrollToSelected(_salesScroll, _selectedSaleIndex);
       return;
@@ -160,10 +90,8 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   void _scrollToSelected(ScrollController controller, int index) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.hasClients) return;
-      final target = (index * 42.0).clamp(
-        0.0,
-        controller.position.maxScrollExtent,
-      );
+      final target =
+          (index * 42.0).clamp(0.0, controller.position.maxScrollExtent);
       controller.animateTo(
         target,
         duration: const Duration(milliseconds: 120),
@@ -183,13 +111,15 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   }
 
   Future<void> _addPurchase() async {
-    final lot = await showDialog<_PurchaseLot>(
+    final notifier = ref.read(purcSpatProvider.notifier);
+    final lot = await showDialog<PurchaseLot>(
       context: context,
-      builder: (context) => _PurchaseDialog(nextSrNo: _nextSrNo),
+      builder: (context) => _PurchaseDialog(nextSrNo: notifier.nextSrNo),
     );
     if (lot == null) return;
+
+    notifier.addLot(lot);
     setState(() {
-      _lots.add(lot);
       _selectedLotIndex = _lots.length - 1;
       _selectedSaleIndex = 0;
       _salesAreaActive = false;
@@ -198,44 +128,88 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   }
 
   Future<void> _editSelectedPurchase() async {
-    final updatedLot = await showDialog<_PurchaseLot>(
+    final lot = _selectedLot;
+    if (lot == null) return;
+
+    final updated = await showDialog<PurchaseLot>(
       context: context,
-      builder: (context) => _PurchaseDialog(
-        nextSrNo: _selectedLot.srNo,
-        initialLot: _selectedLot,
-      ),
+      builder: (context) =>
+          _PurchaseDialog(nextSrNo: lot.srNo, initialLot: lot),
     );
-    if (updatedLot == null) return;
-    setState(() => _lots[_selectedLotIndex] = updatedLot);
+    if (updated == null) return;
+
+    ref.read(purcSpatProvider.notifier).replaceLot(updated);
     _purchaseFocus.requestFocus();
   }
 
   Future<void> _addSale() async {
-    final sale = await showDialog<_SaleLine>(
+    final lot = _selectedLot;
+    if (lot == null) return;
+
+    if (lot.balanceBags <= Money.zero) {
+      _showMessage('Truck ${lot.srNo} is fully sold — no bags remaining.');
+      return;
+    }
+
+    final sale = await showDialog<SaleLine>(
       context: context,
-      builder: (context) =>
-          _SaleDialog(nextBillNo: _selectedLot.sales.length + 1),
+      builder: (context) => _SaleDialog(lot: lot),
     );
     if (sale == null) return;
+
+    final result = ref.read(purcSpatProvider.notifier).addSale(lot.id, sale);
+    if (!result.isValid) {
+      _showMessage(result.summary);
+      return;
+    }
+
     setState(() {
-      final lot = _selectedLot;
-      final updatedSales = [...lot.sales, sale];
-      _lots[_selectedLotIndex] = lot.copyWith(sales: updatedSales);
-      _selectedSaleIndex = updatedSales.length - 1;
+      _selectedSaleIndex = (_selectedLot?.sales.length ?? 1) - 1;
       _salesAreaActive = true;
     });
     _salesFocus.requestFocus();
   }
 
-  int get _nextSrNo {
-    if (_lots.isEmpty) return 1;
-    return _lots.map((lot) => lot.srNo).reduce((a, b) => a > b ? a : b) + 1;
+  Future<void> _editSelectedSale() async {
+    final lot = _selectedLot;
+    if (lot == null || lot.sales.isEmpty) return;
+
+    final index = _selectedSaleIndex.clamp(0, lot.sales.length - 1);
+    final existing = lot.sales[index];
+    final sale = await showDialog<SaleLine>(
+      context: context,
+      builder: (context) => _SaleDialog(lot: lot, initialSale: existing),
+    );
+    if (sale == null) return;
+
+    final result =
+        ref.read(purcSpatProvider.notifier).replaceSale(lot.id, sale);
+    if (!result.isValid) _showMessage(result.summary);
+  }
+
+  void _onEnter() {
+    if (_salesAreaActive) {
+      _editSelectedSale();
+    } else {
+      _editSelectedPurchase();
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final lots = ref.watch(purcSpatProvider);
     final responsive = Responsive(context);
     final isDark = context.isDarkMode;
+    final selectedIndex =
+        lots.isEmpty ? 0 : _selectedLotIndex.clamp(0, lots.length - 1);
+    final selectedLot = lots.isEmpty ? null : lots[selectedIndex];
+    final totals = TradingCalculator.totalsFor(lots);
 
     return CallbackShortcuts(
       bindings: {
@@ -245,9 +219,8 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
             _activateSalesArea,
         const SingleActivator(LogicalKeyboardKey.arrowLeft):
             _activatePurchaseArea,
-        const SingleActivator(LogicalKeyboardKey.enter): _editSelectedPurchase,
-        const SingleActivator(LogicalKeyboardKey.numpadEnter):
-            _editSelectedPurchase,
+        const SingleActivator(LogicalKeyboardKey.enter): _onEnter,
+        const SingleActivator(LogicalKeyboardKey.numpadEnter): _onEnter,
         const SingleActivator(LogicalKeyboardKey.f5): _addSale,
         const SingleActivator(LogicalKeyboardKey.f6): _addPurchase,
       },
@@ -278,7 +251,9 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
+                _TotalsStrip(totals: totals),
+                const SizedBox(height: 12),
                 Expanded(
                   child: Column(
                     children: [
@@ -287,8 +262,8 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
                         child: Focus(
                           focusNode: _purchaseFocus,
                           child: _PurchaseTable(
-                            lots: _lots,
-                            selectedIndex: _selectedLotIndex,
+                            lots: lots,
+                            selectedIndex: selectedIndex,
                             active: !_salesAreaActive,
                             scrollController: _purchaseScroll,
                             onSelected: (index) => setState(() {
@@ -305,7 +280,7 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
                         child: Focus(
                           focusNode: _salesFocus,
                           child: _SalesTable(
-                            sales: _selectedLot.sales,
+                            sales: selectedLot?.sales ?? const [],
                             selectedIndex: _selectedSaleIndex,
                             active: _salesAreaActive,
                             scrollController: _salesScroll,
@@ -330,6 +305,46 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   }
 }
 
+class _TotalsStrip extends StatelessWidget {
+  const _TotalsStrip({required this.totals});
+
+  final LotTotals totals;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(String, String)>[
+      ('Bags', Money.formatQuantity(totals.bags)),
+      ('Sold', Money.formatQuantity(totals.soldBags)),
+      ('Balance', Money.formatQuantity(totals.balanceBags)),
+      (
+        'Caret',
+        '${Money.formatQuantity(totals.soldCarets)} / '
+            '${Money.formatQuantity(totals.carets)}'
+      ),
+      ('Sale Amount', Money.formatCurrency(totals.saleAmount)),
+    ];
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 8,
+      children: [
+        for (final (label, value) in entries)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.emerald600.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '$label: $value',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _PurchaseTable extends StatelessWidget {
   const _PurchaseTable({
     required this.lots,
@@ -339,7 +354,7 @@ class _PurchaseTable extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<_PurchaseLot> lots;
+  final List<PurchaseLot> lots;
   final int selectedIndex;
   final bool active;
   final ScrollController scrollController;
@@ -347,6 +362,13 @@ class _PurchaseTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (lots.isEmpty) {
+      return const _TableShell(
+        active: true,
+        child: Center(child: Text('No trucks entered yet. Press F6 to add.')),
+      );
+    }
+
     return _TableShell(
       active: active,
       child: _ScrollableTable(
@@ -369,21 +391,15 @@ class _PurchaseTable extends StatelessWidget {
             DataColumn(label: Text('Sale')),
             DataColumn(label: Text('Balance')),
             DataColumn(label: Text('Caret')),
+            DataColumn(label: Text('Sale Amount')),
           ],
           rows: [
             for (var i = 0; i < lots.length; i++)
               DataRow(
                 selected: i == selectedIndex,
-                color: WidgetStateProperty.resolveWith((states) {
-                  if (i == selectedIndex) {
-                    return active
-                        ? AppColors.emerald600.withValues(alpha: 0.18)
-                        : AppColors.blue500.withValues(alpha: 0.10);
-                  }
-                  return i.isEven
-                      ? Colors.transparent
-                      : Colors.black.withValues(alpha: 0.03);
-                }),
+                color: WidgetStateProperty.resolveWith(
+                  (states) => _rowColor(i, selectedIndex, active),
+                ),
                 cells: [
                   DataCell(Text('${lots[i].srNo}'), onTap: () => onSelected(i)),
                   DataCell(Text(Formatters.numericDate(lots[i].date)),
@@ -401,6 +417,8 @@ class _PurchaseTable extends StatelessWidget {
                         '${Formatters.quantity(lots[i].soldCarets)} / ${Formatters.quantity(lots[i].totalCarets)}'),
                     onTap: () => onSelected(i),
                   ),
+                  DataCell(Text(Formatters.amount(lots[i].saleAmount)),
+                      onTap: () => onSelected(i)),
                 ],
               ),
           ],
@@ -419,7 +437,7 @@ class _SalesTable extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<_SaleLine> sales;
+  final List<SaleLine> sales;
   final int selectedIndex;
   final bool active;
   final ScrollController scrollController;
@@ -435,6 +453,8 @@ class _SalesTable extends StatelessWidget {
         ),
       );
     }
+
+    final selected = selectedIndex.clamp(0, sales.length - 1);
 
     return _TableShell(
       active: active,
@@ -454,6 +474,7 @@ class _SalesTable extends StatelessWidget {
             DataColumn(label: Text('Bill Date')),
             DataColumn(label: Text('Party Name')),
             DataColumn(label: Text('Bags')),
+            DataColumn(label: Text('Caret')),
             DataColumn(label: Text('Weight')),
             DataColumn(label: Text('Rate')),
             DataColumn(label: Text('Unit')),
@@ -462,17 +483,10 @@ class _SalesTable extends StatelessWidget {
           rows: [
             for (var i = 0; i < sales.length; i++)
               DataRow(
-                selected: i == selectedIndex,
-                color: WidgetStateProperty.resolveWith((states) {
-                  if (i == selectedIndex) {
-                    return active
-                        ? AppColors.emerald600.withValues(alpha: 0.18)
-                        : AppColors.blue500.withValues(alpha: 0.10);
-                  }
-                  return i.isEven
-                      ? Colors.transparent
-                      : Colors.black.withValues(alpha: 0.03);
-                }),
+                selected: i == selected,
+                color: WidgetStateProperty.resolveWith(
+                  (states) => _rowColor(i, selected, active),
+                ),
                 cells: [
                   DataCell(Text('${sales[i].billNo}'),
                       onTap: () => onSelected(i)),
@@ -482,11 +496,14 @@ class _SalesTable extends StatelessWidget {
                       onTap: () => onSelected(i)),
                   DataCell(Text(Formatters.quantity(sales[i].bags)),
                       onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].carets)),
+                      onTap: () => onSelected(i)),
                   DataCell(Text(Formatters.quantity(sales[i].weight)),
                       onTap: () => onSelected(i)),
                   DataCell(Text(Formatters.quantity(sales[i].rate)),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(sales[i].unit), onTap: () => onSelected(i)),
+                  DataCell(Text(sales[i].unit.label),
+                      onTap: () => onSelected(i)),
                   DataCell(Text(Formatters.amount(sales[i].amount)),
                       onTap: () => onSelected(i)),
                 ],
@@ -496,6 +513,17 @@ class _SalesTable extends StatelessWidget {
       ),
     );
   }
+}
+
+Color _rowColor(int index, int selectedIndex, bool active) {
+  if (index == selectedIndex) {
+    return active
+        ? AppColors.emerald600.withValues(alpha: 0.18)
+        : AppColors.blue500.withValues(alpha: 0.10);
+  }
+  return index.isEven
+      ? Colors.transparent
+      : Colors.black.withValues(alpha: 0.03);
 }
 
 class _ScrollableTable extends StatelessWidget {
@@ -564,12 +592,13 @@ class _ShortcutBar extends StatelessWidget {
     return Container(
       height: 36,
       alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: AppColors.emerald800,
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Text(
-        'Enter Edit Truck    F5 Add Customer    F6 Add Truck    Down in Sales Adds Next Customer    Esc Back',
+        'Enter Edit    F5 Add Customer    F6 Add Truck    Down in Sales Adds Next Customer    Esc Back',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
@@ -582,7 +611,7 @@ class _PurchaseDialog extends StatefulWidget {
   const _PurchaseDialog({required this.nextSrNo, this.initialLot});
 
   final int nextSrNo;
-  final _PurchaseLot? initialLot;
+  final PurchaseLot? initialLot;
 
   @override
   State<_PurchaseDialog> createState() => _PurchaseDialogState();
@@ -593,6 +622,8 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
   late final TextEditingController _item;
   late final TextEditingController _bags;
   late final TextEditingController _carets;
+
+  ValidationResult _validation = const ValidationResult.valid();
 
   bool get _isEditing => widget.initialLot != null;
 
@@ -618,49 +649,98 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
     super.dispose();
   }
 
+  void _save() {
+    final bags = Money.parseOrZero(_bags.text);
+    final carets = Money.parseOrZero(_carets.text);
+    final result = TradingCalculator.validatePurchase(
+      partyName: _party.text,
+      item: _item.text,
+      bags: bags,
+      carets: carets,
+      existing: widget.initialLot,
+    );
+
+    if (!result.isValid) {
+      setState(() => _validation = result);
+      return;
+    }
+
+    final existing = widget.initialLot;
+    Navigator.pop(
+      context,
+      PurchaseLot(
+        id: existing?.id ?? 'lot-${DateTime.now().microsecondsSinceEpoch}',
+        srNo: widget.nextSrNo,
+        date: existing?.date ?? DateTime.now(),
+        partyName: _party.text.trim().toUpperCase(),
+        item: _item.text.trim().toUpperCase(),
+        bags: bags,
+        totalCarets: carets,
+        sales: existing?.sales ?? const [],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(_isEditing ? 'Edit Purchase Truck' : 'Add Purchase Truck'),
       content: SizedBox(
         width: 420,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _party,
-              decoration: const InputDecoration(labelText: 'Name of the Party'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _item,
-              decoration: const InputDecoration(labelText: 'Item'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _bags,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Bags'),
-                    textInputAction: TextInputAction.next,
-                  ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _party,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Name of the Party',
+                  errorText: _validation.messageFor('partyName'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _carets,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Caret'),
-                    textInputAction: TextInputAction.done,
-                  ),
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _item,
+                decoration: InputDecoration(
+                  labelText: 'Item',
+                  errorText: _validation.messageFor('item'),
                 ),
-              ],
-            ),
-          ],
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _bags,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Bags',
+                        errorText: _validation.messageFor('bags'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _carets,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Caret',
+                        errorText: _validation.messageFor('carets'),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _save(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -668,118 +748,234 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            final bags = double.tryParse(_bags.text.trim()) ?? 0;
-            if (_party.text.trim().isEmpty ||
-                _item.text.trim().isEmpty ||
-                bags <= 0) {
-              return;
-            }
-            Navigator.pop(
-              context,
-              _PurchaseLot(
-                srNo: widget.nextSrNo,
-                date: widget.initialLot?.date ?? DateTime.now(),
-                partyName: _party.text.trim().toUpperCase(),
-                item: _item.text.trim().toUpperCase(),
-                bags: bags,
-                totalCarets: double.tryParse(_carets.text.trim()) ?? 0,
-                sales: widget.initialLot?.sales ?? const [],
-              ),
-            );
-          },
-          child: const Text('Save'),
-        ),
+        ElevatedButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }
 }
 
 class _SaleDialog extends StatefulWidget {
-  const _SaleDialog({required this.nextBillNo});
+  const _SaleDialog({required this.lot, this.initialSale});
 
-  final int nextBillNo;
+  final PurchaseLot lot;
+  final SaleLine? initialSale;
 
   @override
   State<_SaleDialog> createState() => _SaleDialogState();
 }
 
 class _SaleDialogState extends State<_SaleDialog> {
-  final _party = TextEditingController();
-  final _bags = TextEditingController();
-  final _weight = TextEditingController();
-  final _rate = TextEditingController();
-  final _unit = TextEditingController(text: '1KG');
+  late final TextEditingController _party;
+  late final TextEditingController _bags;
+  late final TextEditingController _carets;
+  late final TextEditingController _weight;
+  late final TextEditingController _rate;
+  late RateUnit _unit;
+
+  ValidationResult _validation = const ValidationResult.valid();
+
+  @override
+  void initState() {
+    super.initState();
+    final sale = widget.initialSale;
+    _party = TextEditingController(text: sale?.partyName ?? '');
+    _bags = TextEditingController(
+      text: sale == null ? '' : Money.formatQuantity(sale.bags),
+    );
+    _carets = TextEditingController(
+      text: sale == null ? '0' : Money.formatQuantity(sale.carets),
+    );
+    _weight = TextEditingController(
+      text: sale == null ? '' : Money.formatQuantity(sale.weight),
+    );
+    _rate = TextEditingController(
+      text: sale == null ? '' : Money.formatQuantity(sale.rate),
+    );
+    _unit = sale?.unit ?? RateUnit.perKg;
+
+    for (final controller in [_bags, _carets, _weight, _rate]) {
+      controller.addListener(() => setState(() {}));
+    }
+  }
 
   @override
   void dispose() {
     _party.dispose();
     _bags.dispose();
+    _carets.dispose();
     _weight.dispose();
     _rate.dispose();
-    _unit.dispose();
     super.dispose();
+  }
+
+  Decimal get _liveAmount => _unit.amount(
+        weight: Money.parseOrZero(_weight.text),
+        bags: Money.parseOrZero(_bags.text),
+        carets: Money.parseOrZero(_carets.text),
+        rate: Money.parseOrZero(_rate.text),
+      );
+
+  void _save() {
+    final bags = Money.parseOrZero(_bags.text);
+    final carets = Money.parseOrZero(_carets.text);
+    final weight = Money.parseOrZero(_weight.text);
+    final rate = Money.parseOrZero(_rate.text);
+
+    final result = TradingCalculator.validateSale(
+      lot: widget.lot,
+      partyName: _party.text,
+      bags: bags,
+      carets: carets,
+      weight: weight,
+      rate: rate,
+      replacing: widget.initialSale,
+    );
+
+    if (!result.isValid) {
+      setState(() => _validation = result);
+      return;
+    }
+
+    final existing = widget.initialSale;
+    Navigator.pop(
+      context,
+      SaleLine(
+        id: existing?.id ?? 'sale-${DateTime.now().microsecondsSinceEpoch}',
+        billNo: existing?.billNo ?? widget.lot.nextBillNo,
+        date: existing?.date ?? DateTime.now(),
+        partyName: _party.text.trim().toUpperCase(),
+        bags: bags,
+        carets: carets,
+        weight: weight,
+        rate: rate,
+        unit: _unit,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final lot = widget.lot;
+    final availableBags =
+        lot.balanceBags + (widget.initialSale?.bags ?? Money.zero);
+
     return AlertDialog(
-      title: const Text('Add Customer Sale'),
+      title: Text(
+        widget.initialSale == null ? 'Add Customer Sale' : 'Edit Customer Sale',
+      ),
       content: SizedBox(
         width: 460,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _party,
-              decoration: const InputDecoration(labelText: 'Party Name'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _bags,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Bags'),
-                    textInputAction: TextInputAction.next,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Truck ${lot.srNo} — ${lot.item} — '
+                '${Money.formatQuantity(availableBags)} bags available',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _party,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Party Name',
+                  errorText: _validation.messageFor('partyName'),
+                ),
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _bags,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Bags',
+                        errorText: _validation.messageFor('bags'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _carets,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Caret',
+                        errorText: _validation.messageFor('carets'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _weight,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Weight',
+                        errorText: _validation.messageFor('weight'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _rate,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Rate',
+                        errorText: _validation.messageFor('rate'),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _save(),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue:
+                          RateUnit.presets.any((u) => u.label == _unit.label)
+                              ? _unit.label
+                              : RateUnit.perKg.label,
+                      decoration: const InputDecoration(labelText: 'Unit'),
+                      items: [
+                        for (final unit in RateUnit.presets)
+                          DropdownMenuItem(
+                            value: unit.label,
+                            child: Text(unit.label),
+                          ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _unit = RateUnit.parse(value)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Amount: ${Money.formatCurrency(_liveAmount)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _weight,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Weight'),
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _rate,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Rate'),
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _unit,
-                    decoration: const InputDecoration(labelText: 'Unit'),
-                    textInputAction: TextInputAction.done,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -787,93 +983,8 @@ class _SaleDialogState extends State<_SaleDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            final bags = double.tryParse(_bags.text.trim()) ?? 0;
-            final weight = double.tryParse(_weight.text.trim()) ?? 0;
-            final rate = double.tryParse(_rate.text.trim()) ?? 0;
-            if (_party.text.trim().isEmpty ||
-                bags <= 0 ||
-                weight <= 0 ||
-                rate <= 0) {
-              return;
-            }
-            Navigator.pop(
-              context,
-              _SaleLine(
-                billNo: widget.nextBillNo,
-                date: DateTime.now(),
-                partyName: _party.text.trim().toUpperCase(),
-                bags: bags,
-                weight: weight,
-                rate: rate,
-                unit: _unit.text.trim().isEmpty
-                    ? '1KG'
-                    : _unit.text.trim().toUpperCase(),
-              ),
-            );
-          },
-          child: const Text('Save'),
-        ),
+        ElevatedButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }
-}
-
-class _PurchaseLot {
-  const _PurchaseLot({
-    required this.srNo,
-    required this.date,
-    required this.partyName,
-    required this.item,
-    required this.bags,
-    required this.totalCarets,
-    required this.sales,
-  });
-
-  final int srNo;
-  final DateTime date;
-  final String partyName;
-  final String item;
-  final double bags;
-  final double totalCarets;
-  final List<_SaleLine> sales;
-
-  double get soldBags => sales.fold(0, (sum, sale) => sum + sale.bags);
-  double get balanceBags => bags - soldBags;
-  double get soldCarets => sales.fold(0, (sum, sale) => sum + sale.bags);
-
-  _PurchaseLot copyWith({List<_SaleLine>? sales}) {
-    return _PurchaseLot(
-      srNo: srNo,
-      date: date,
-      partyName: partyName,
-      item: item,
-      bags: bags,
-      totalCarets: totalCarets,
-      sales: sales ?? this.sales,
-    );
-  }
-}
-
-class _SaleLine {
-  const _SaleLine({
-    required this.billNo,
-    required this.date,
-    required this.partyName,
-    required this.bags,
-    required this.weight,
-    required this.rate,
-    required this.unit,
-  });
-
-  final int billNo;
-  final DateTime date;
-  final String partyName;
-  final double bags;
-  final double weight;
-  final double rate;
-  final String unit;
-
-  double get amount => weight * rate;
 }
