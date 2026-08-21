@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/messages.dart';
 import '../../../models/customer_model.dart';
 import '../../../services/customers_provider.dart';
 
@@ -82,9 +83,7 @@ class _CustomerFormDialogState extends ConsumerState<CustomerFormDialog> {
     }
 
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(isEditing ? 'Customer updated' : 'Customer added')),
-    );
+    context.showMessage(isEditing ? 'Customer updated' : 'Customer added');
   }
 
   @override
@@ -101,7 +100,8 @@ class _CustomerFormDialogState extends ConsumerState<CustomerFormDialog> {
               children: [
                 TextFormField(
                   controller: _nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Business Name *'),
+                  decoration:
+                      const InputDecoration(labelText: 'Business Name *'),
                   validator: (v) =>
                       v == null || v.trim().isEmpty ? 'Name is required' : null,
                 ),
@@ -110,8 +110,9 @@ class _CustomerFormDialogState extends ConsumerState<CustomerFormDialog> {
                   controller: _phoneCtrl,
                   decoration: const InputDecoration(labelText: 'Phone *'),
                   keyboardType: TextInputType.phone,
-                  validator: (v) =>
-                      v == null || v.trim().length < 10 ? 'Valid phone required' : null,
+                  validator: (v) => v == null || v.trim().length < 10
+                      ? 'Valid phone required'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -134,8 +135,9 @@ class _CustomerFormDialogState extends ConsumerState<CustomerFormDialog> {
                 TextFormField(
                   controller: _addressCtrl,
                   decoration: const InputDecoration(labelText: 'Address *'),
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Address is required' : null,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? 'Address is required'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -150,8 +152,11 @@ class _CustomerFormDialogState extends ConsumerState<CustomerFormDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        ElevatedButton(onPressed: _save, child: Text(isEditing ? 'Save' : 'Add')),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
+        ElevatedButton(
+            onPressed: _save, child: Text(isEditing ? 'Save' : 'Add')),
       ],
     );
   }

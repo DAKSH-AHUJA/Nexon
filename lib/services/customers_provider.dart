@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/utils/collection_utils.dart';
 import '../models/customer_model.dart';
 import 'data_service.dart';
 
@@ -33,28 +34,16 @@ class CustomersState {
     }
 
     if (searchQuery.isNotEmpty) {
-      final q = searchQuery.toLowerCase();
       result = result
-          .where(
-            (c) =>
-                c.name.toLowerCase().contains(q) ||
-                c.phone.contains(q) ||
-                c.city.toLowerCase().contains(q),
-          )
+          .where((c) => matchesQuery(searchQuery, [c.name, c.phone, c.city]))
           .toList();
     }
 
     return result;
   }
 
-  Customer? get selected {
-    if (selectedId == null) return null;
-    try {
-      return customers.firstWhere((c) => c.id == selectedId);
-    } catch (_) {
-      return null;
-    }
-  }
+  Customer? get selected =>
+      customers.firstWhereOrNull((c) => c.id == selectedId);
 
   CustomersState copyWith({
     List<Customer>? customers,
@@ -85,10 +74,11 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
   Future<void> _load() async {
     state = state.copyWith(isLoading: true);
     final service = _ref.read(jsonDataServiceProvider);
-    final json = await service.loadJson('customers.json');
-    final list = (json['customers'] as List<dynamic>)
-        .map((e) => Customer.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final list = await service.loadList(
+      'customers.json',
+      'customers',
+      Customer.fromJson,
+    );
     state = state.copyWith(
       customers: list,
       isLoading: false,

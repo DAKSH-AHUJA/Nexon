@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/page_header.dart';
 import '../../domain/calculators/trading_calculator.dart';
@@ -203,7 +205,7 @@ class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
   Widget build(BuildContext context) {
     final lots = ref.watch(purcSpatProvider);
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final selectedIndex =
         lots.isEmpty ? 0 : _selectedLotIndex.clamp(0, lots.length - 1);
     final selectedLot = lots.isEmpty ? null : lots[selectedIndex];
@@ -399,19 +401,24 @@ class _PurchaseTable extends StatelessWidget {
                   (states) => _rowColor(i, selectedIndex, active),
                 ),
                 cells: [
-                  for (final text in [
-                    '${lots[i].srNo}',
-                    _formatDate(lots[i].date),
-                    lots[i].partyName,
-                    lots[i].item,
-                    Money.formatQuantity(lots[i].bags),
-                    Money.formatQuantity(lots[i].soldBags),
-                    Money.formatQuantity(lots[i].balanceBags),
-                    '${Money.formatQuantity(lots[i].soldCarets)} / '
-                        '${Money.formatQuantity(lots[i].totalCarets)}',
-                    Money.formatCurrency(lots[i].saleAmount),
-                  ])
-                    DataCell(Text(text), onTap: () => onSelected(i)),
+                  DataCell(Text('${lots[i].srNo}'), onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.numericDate(lots[i].date)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(lots[i].partyName), onTap: () => onSelected(i)),
+                  DataCell(Text(lots[i].item), onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(lots[i].bags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(lots[i].soldBags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(lots[i].balanceBags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(
+                    Text(
+                        '${Formatters.quantity(lots[i].soldCarets)} / ${Formatters.quantity(lots[i].totalCarets)}'),
+                    onTap: () => onSelected(i),
+                  ),
+                  DataCell(Text(Formatters.amount(lots[i].saleAmount)),
+                      onTap: () => onSelected(i)),
                 ],
               ),
           ],
@@ -481,18 +488,24 @@ class _SalesTable extends StatelessWidget {
                   (states) => _rowColor(i, selected, active),
                 ),
                 cells: [
-                  for (final text in [
-                    '${sales[i].billNo}',
-                    _formatDate(sales[i].date),
-                    sales[i].partyName,
-                    Money.formatQuantity(sales[i].bags),
-                    Money.formatQuantity(sales[i].carets),
-                    Money.formatQuantity(sales[i].weight),
-                    Money.formatQuantity(sales[i].rate),
-                    sales[i].unit.label,
-                    Money.formatCurrency(sales[i].amount),
-                  ])
-                    DataCell(Text(text), onTap: () => onSelected(i)),
+                  DataCell(Text('${sales[i].billNo}'),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.numericDate(sales[i].date)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(sales[i].partyName),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].bags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].carets)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].weight)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].rate)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(sales[i].unit.label),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.amount(sales[i].amount)),
+                      onTap: () => onSelected(i)),
                 ],
               ),
           ],
@@ -550,7 +563,7 @@ class _TableShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
@@ -621,10 +634,9 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
     _party = TextEditingController(text: lot?.partyName ?? '');
     _item = TextEditingController(text: lot?.item ?? '');
     _bags = TextEditingController(
-      text: lot == null ? '' : Money.formatQuantity(lot.bags),
-    );
+        text: lot == null ? '' : Formatters.quantity(lot.bags));
     _carets = TextEditingController(
-      text: lot == null ? '0' : Money.formatQuantity(lot.totalCarets),
+      text: lot == null ? '0' : Formatters.quantity(lot.totalCarets),
     );
   }
 
@@ -975,10 +987,4 @@ class _SaleDialogState extends State<_SaleDialog> {
       ],
     );
   }
-}
-
-String _formatDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day/$month/${date.year}';
 }

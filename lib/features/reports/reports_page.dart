@@ -4,9 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
+import '../../core/widgets/async_value_view.dart';
+import '../../core/widgets/chart_axis.dart';
+import '../../core/widgets/metric_card.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
+import '../../core/widgets/section_card.dart';
 import '../../services/suppliers_provider.dart';
 
 enum ReportTab { sales, lotWise, customers, profit }
@@ -28,9 +33,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
     return Padding(
       padding: EdgeInsets.all(responsive.contentPadding),
-      child: dataAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+      child: AsyncValueView(
+        value: dataAsync,
         data: (data) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -40,9 +44,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                   'Statements, outstanding, lot-wise, party-wise, and profit reports',
               actions: [
                 OutlinedButton.icon(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Export started - CSV saved')),
-                  ),
+                  onPressed: () =>
+                      context.showMessage('Export started - CSV saved'),
                   icon: const Icon(Icons.download, size: 18),
                   label: const Text('Export'),
                 ),
@@ -92,29 +95,21 @@ class _SalesReport extends StatelessWidget {
 
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Total Sales',
-                value:
-                    Formatters.currency((data['totalSales'] as num).toDouble()),
-              ),
+        MetricRow(
+          cards: [
+            MetricCard(
+              label: 'Total Sales',
+              value:
+                  Formatters.currency((data['totalSales'] as num).toDouble()),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Total Invoices',
-                value: Formatters.number(data['totalInvoices'] as int),
-              ),
+            MetricCard(
+              label: 'Total Invoices',
+              value: Formatters.number(data['totalInvoices'] as int),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Avg Order Value',
-                value: Formatters.currency(
-                    (data['avgOrderValue'] as num).toDouble()),
-              ),
+            MetricCard(
+              label: 'Avg Order Value',
+              value: Formatters.currency(
+                  (data['avgOrderValue'] as num).toDouble()),
             ),
           ],
         ),
@@ -131,27 +126,13 @@ class _SalesReport extends StatelessWidget {
                       color: AppColors.lightBorder, strokeWidth: 1),
                 ),
                 titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (v, _) {
-                        final i = v.toInt();
-                        if (i < 0 || i >= monthly.length) {
-                          return const SizedBox();
-                        }
-                        return Text(
-                          (monthly[i] as Map)['month'] as String,
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      },
-                    ),
+                  bottomTitles: categoryAxisTitles(
+                    _months(monthly),
+                    style: const TextStyle(fontSize: 10),
                   ),
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: hiddenAxisTitles,
+                  topTitles: hiddenAxisTitles,
+                  rightTitles: hiddenAxisTitles,
                 ),
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
@@ -192,21 +173,16 @@ class _LotWiseReport extends StatelessWidget {
 
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Lot Value',
-                value:
-                    Formatters.currency((data['totalValue'] as num).toDouble()),
-              ),
+        MetricRow(
+          cards: [
+            MetricCard(
+              label: 'Lot Value',
+              value:
+                  Formatters.currency((data['totalValue'] as num).toDouble()),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Open Lots',
-                value: Formatters.number(data['lowStockItems'] as int),
-              ),
+            MetricCard(
+              label: 'Open Lots',
+              value: Formatters.number(data['lowStockItems'] as int),
             ),
           ],
         ),
@@ -243,56 +219,39 @@ class _CustomerReport extends StatelessWidget {
 
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Total Customers',
-                value: Formatters.number(data['totalCustomers'] as int),
-              ),
+        MetricRow(
+          cards: [
+            MetricCard(
+              label: 'Total Customers',
+              value: Formatters.number(data['totalCustomers'] as int),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Active',
-                value: Formatters.number(data['activeCustomers'] as int),
-              ),
+            MetricCard(
+              label: 'Active',
+              value: Formatters.number(data['activeCustomers'] as int),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Outstanding',
-                value: Formatters.currency(
-                    (data['totalOutstanding'] as num).toDouble()),
-              ),
+            MetricCard(
+              label: 'Outstanding',
+              value: Formatters.currency(
+                  (data['totalOutstanding'] as num).toDouble()),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        NexonCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text('Top Customers',
-                    style: Theme.of(context).textTheme.titleMedium),
-              ),
-              const Divider(height: 1),
-              ...top.map((c) {
-                final cust = c as Map<String, dynamic>;
-                return ListTile(
-                  title: Text(cust['name'] as String),
-                  subtitle: Text('${cust['orders']} orders'),
-                  trailing: Text(
-                    Formatters.currency((cust['purchases'] as num).toDouble()),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                );
-              }),
-            ],
-          ),
+        SectionCard(
+          title: 'Top Customers',
+          children: [
+            ...top.map((c) {
+              final cust = c as Map<String, dynamic>;
+              return ListTile(
+                title: Text(cust['name'] as String),
+                subtitle: Text('${cust['orders']} orders'),
+                trailing: Text(
+                  Formatters.currency((cust['purchases'] as num).toDouble()),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              );
+            }),
+          ],
         ),
       ],
     );
@@ -310,29 +269,20 @@ class _ProfitReport extends StatelessWidget {
 
     return Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _MetricCard(
-                label: 'Gross Profit',
-                value: Formatters.currency(
-                    (data['grossProfit'] as num).toDouble()),
-              ),
+        MetricRow(
+          cards: [
+            MetricCard(
+              label: 'Gross Profit',
+              value:
+                  Formatters.currency((data['grossProfit'] as num).toDouble()),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Net Profit',
-                value:
-                    Formatters.currency((data['netProfit'] as num).toDouble()),
-              ),
+            MetricCard(
+              label: 'Net Profit',
+              value: Formatters.currency((data['netProfit'] as num).toDouble()),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MetricCard(
-                label: 'Margin',
-                value: '${data['margin']}%',
-              ),
+            MetricCard(
+              label: 'Margin',
+              value: '${data['margin']}%',
             ),
           ],
         ),
@@ -345,27 +295,13 @@ class _ProfitReport extends StatelessWidget {
                 alignment: BarChartAlignment.spaceAround,
                 gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (v, _) {
-                        final i = v.toInt();
-                        if (i < 0 || i >= monthly.length) {
-                          return const SizedBox();
-                        }
-                        return Text(
-                          (monthly[i] as Map)['month'] as String,
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      },
-                    ),
+                  bottomTitles: categoryAxisTitles(
+                    _months(monthly),
+                    style: const TextStyle(fontSize: 10),
                   ),
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: hiddenAxisTitles,
+                  topTitles: hiddenAxisTitles,
+                  rightTitles: hiddenAxisTitles,
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: monthly.asMap().entries.map((e) {
@@ -391,29 +327,5 @@ class _ProfitReport extends StatelessWidget {
   }
 }
 
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return NexonCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+List<String> _months(List<dynamic> entries) =>
+    entries.map((e) => (e as Map)['month'] as String).toList();

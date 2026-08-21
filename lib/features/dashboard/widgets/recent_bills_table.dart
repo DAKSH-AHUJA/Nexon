@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/animated_counter.dart';
 import '../../../core/widgets/nexon_card.dart';
@@ -50,7 +50,6 @@ class _BillRowState extends State<_BillRow> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bill = widget.bill;
 
     return MouseRegion(
@@ -61,11 +60,7 @@ class _BillRowState extends State<_BillRow> {
         margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: _hovered
-              ? (isDark
-                  ? AppColors.darkCardElevated
-                  : AppColors.lightBackground)
-              : Colors.transparent,
+          color: _hovered ? context.appCardElevated : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -103,57 +98,10 @@ class _BillRowState extends State<_BillRow> {
                   ),
             ),
             const SizedBox(width: 12),
-            _statusBadge(bill.status),
+            StatusBadge.invoice(bill.status),
           ],
         ),
       ),
     );
-  }
-
-  Widget _statusBadge(String status) {
-    return switch (status) {
-      'paid' => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.success.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            'Paid',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.success,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-      'overdue' => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.danger.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            'Overdue',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.danger,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-      _ => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.warning.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            'Pending',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.warning,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-    };
   }
 }

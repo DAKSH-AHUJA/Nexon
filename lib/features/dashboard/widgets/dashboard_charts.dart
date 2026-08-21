@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/chart_axis.dart';
 import '../../../core/widgets/nexon_card.dart';
 import '../../../models/dashboard_model.dart';
 
@@ -15,7 +17,6 @@ class MonthlySalesChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final maxY = data.map((e) => e.sales).reduce((a, b) => a > b ? a : b);
 
     return NexonCard(
@@ -57,7 +58,7 @@ class MonthlySalesChart extends StatelessWidget {
                       return BarTooltipItem(
                         '$label\n${Formatters.currencyCompact(value)}',
                         TextStyle(
-                          color: isDark
+                          color: context.isDarkMode
                               ? AppColors.textPrimaryDark
                               : AppColors.textPrimaryLight,
                           fontWeight: FontWeight.w600,
@@ -69,12 +70,8 @@ class MonthlySalesChart extends StatelessWidget {
                 ),
                 titlesData: FlTitlesData(
                   show: true,
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
+                  topTitles: hiddenAxisTitles,
+                  rightTitles: hiddenAxisTitles,
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
@@ -87,23 +84,10 @@ class MonthlySalesChart extends StatelessWidget {
                       },
                     ),
                   ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        final index = value.toInt();
-                        if (index < 0 || index >= data.length) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            data[index].month,
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        );
-                      },
-                    ),
+                  bottomTitles: categoryAxisTitles(
+                    data.map((e) => e.month).toList(),
+                    style: Theme.of(context).textTheme.labelSmall,
+                    padding: const EdgeInsets.only(top: 8),
                   ),
                 ),
                 gridData: FlGridData(
@@ -111,8 +95,7 @@ class MonthlySalesChart extends StatelessWidget {
                   drawVerticalLine: false,
                   horizontalInterval: maxY / 4,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color:
-                        isDark ? AppColors.darkBorder : AppColors.lightBorder,
+                    color: context.appBorder,
                     strokeWidth: 1,
                   ),
                 ),
