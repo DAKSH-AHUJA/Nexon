@@ -199,16 +199,13 @@ void main() {
       expect(notifier.state.customers.map((c) => c.id), ['cust_002']);
     });
 
-    test('deleteCustomer leaves no selection when the selected row goes',
-        () async {
-      // clearSelection takes precedence over the selectedId fallback in
-      // CustomersState.copyWith, so no customer is reselected.
+    test('deleteCustomer reselects the first remaining customer', () async {
       final notifier = await loadedNotifier();
 
       notifier.deleteCustomer('cust_001');
 
-      expect(notifier.state.selectedId, isNull);
-      expect(notifier.state.selected, isNull);
+      expect(notifier.state.selectedId, 'cust_002');
+      expect(notifier.state.selected?.id, 'cust_002');
     });
 
     test('deleteCustomer keeps the selection when another row is removed',

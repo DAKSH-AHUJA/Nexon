@@ -41,10 +41,8 @@ void main() {
   });
 
   group('number', () {
-    // Unlike the currency formatters, `number` is not locale-pinned to en_IN,
-    // so it groups in thousands rather than lakhs.
-    test('groups thousands without a currency symbol', () {
-      expect(Formatters.number(1234567), '1,234,567');
+    test('groups in lakhs without a currency symbol', () {
+      expect(Formatters.number(1234567), '12,34,567');
       expect(Formatters.number(0), '0');
       expect(Formatters.number(12.7), '13');
     });
