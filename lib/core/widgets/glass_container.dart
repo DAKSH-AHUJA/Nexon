@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/theme_context.dart';
 
 /// Glassmorphism container for premium overlays.
 class GlassContainer extends StatelessWidget {
@@ -21,7 +22,7 @@ class GlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/page_header.dart';
 
@@ -233,7 +235,7 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
 
     return CallbackShortcuts(
       bindings: {
@@ -384,19 +386,19 @@ class _PurchaseTable extends StatelessWidget {
                 }),
                 cells: [
                   DataCell(Text('${lots[i].srNo}'), onTap: () => onSelected(i)),
-                  DataCell(Text(_formatDate(lots[i].date)),
+                  DataCell(Text(Formatters.numericDate(lots[i].date)),
                       onTap: () => onSelected(i)),
                   DataCell(Text(lots[i].partyName), onTap: () => onSelected(i)),
                   DataCell(Text(lots[i].item), onTap: () => onSelected(i)),
-                  DataCell(Text(_number(lots[i].bags)),
+                  DataCell(Text(Formatters.quantity(lots[i].bags)),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(_number(lots[i].soldBags)),
+                  DataCell(Text(Formatters.quantity(lots[i].soldBags)),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(_number(lots[i].balanceBags)),
+                  DataCell(Text(Formatters.quantity(lots[i].balanceBags)),
                       onTap: () => onSelected(i)),
                   DataCell(
                     Text(
-                        '${_number(lots[i].soldCarets)} / ${_number(lots[i].totalCarets)}'),
+                        '${Formatters.quantity(lots[i].soldCarets)} / ${Formatters.quantity(lots[i].totalCarets)}'),
                     onTap: () => onSelected(i),
                   ),
                 ],
@@ -474,18 +476,18 @@ class _SalesTable extends StatelessWidget {
                 cells: [
                   DataCell(Text('${sales[i].billNo}'),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(_formatDate(sales[i].date)),
+                  DataCell(Text(Formatters.numericDate(sales[i].date)),
                       onTap: () => onSelected(i)),
                   DataCell(Text(sales[i].partyName),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(_number(sales[i].bags)),
+                  DataCell(Text(Formatters.quantity(sales[i].bags)),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(_number(sales[i].weight)),
+                  DataCell(Text(Formatters.quantity(sales[i].weight)),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(_number(sales[i].rate)),
+                  DataCell(Text(Formatters.quantity(sales[i].rate)),
                       onTap: () => onSelected(i)),
                   DataCell(Text(sales[i].unit), onTap: () => onSelected(i)),
-                  DataCell(Text(_money(sales[i].amount)),
+                  DataCell(Text(Formatters.amount(sales[i].amount)),
                       onTap: () => onSelected(i)),
                 ],
               ),
@@ -533,7 +535,7 @@ class _TableShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
@@ -600,9 +602,10 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
     final lot = widget.initialLot;
     _party = TextEditingController(text: lot?.partyName ?? '');
     _item = TextEditingController(text: lot?.item ?? '');
-    _bags = TextEditingController(text: lot == null ? '' : _number(lot.bags));
+    _bags = TextEditingController(
+        text: lot == null ? '' : Formatters.quantity(lot.bags));
     _carets = TextEditingController(
-      text: lot == null ? '0' : _number(lot.totalCarets),
+      text: lot == null ? '0' : Formatters.quantity(lot.totalCarets),
     );
   }
 
@@ -874,16 +877,3 @@ class _SaleLine {
 
   double get amount => weight * rate;
 }
-
-String _formatDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day/$month/${date.year}';
-}
-
-String _number(double value) {
-  if (value == value.roundToDouble()) return value.toInt().toString();
-  return value.toStringAsFixed(2);
-}
-
-String _money(double value) => value.toStringAsFixed(2);

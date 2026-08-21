@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
@@ -37,9 +38,7 @@ class BillingPage extends ConsumerWidget {
                 OutlinedButton(
                   onPressed: () {
                     ref.read(billingProvider.notifier).clear();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Draft cleared')),
-                    );
+                    context.showMessage('Draft cleared');
                   },
                   child: const Text('Clear'),
                 ),
@@ -351,11 +350,8 @@ class _InvoiceSummary extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: draft.isValid
-                      ? () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'WhatsApp share simulated — invoice sent!'),
-                            ),
+                      ? () => context.showMessage(
+                            'WhatsApp share simulated — invoice sent!',
                           )
                       : null,
                   icon: const Icon(Icons.chat, size: 18),
@@ -366,11 +362,8 @@ class _InvoiceSummary extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: draft.isValid
-                      ? () => ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'PDF download simulated — saved to Downloads'),
-                            ),
+                      ? () => context.showMessage(
+                            'PDF download simulated — saved to Downloads',
                           )
                       : null,
                   icon: const Icon(Icons.download, size: 18),

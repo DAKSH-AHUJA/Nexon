@@ -1,4 +1,4 @@
-﻿import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 abstract final class Formatters {
   static final _currency = NumberFormat.currency(
@@ -21,6 +21,7 @@ abstract final class Formatters {
 
   static final _number = NumberFormat('#,##0');
   static final _date = DateFormat('dd MMM yyyy');
+  static final _numericDate = DateFormat('dd/MM/yyyy');
   static final _dateTime = DateFormat('dd MMM yyyy, hh:mm a');
   static final _time = DateFormat('hh:mm a');
 
@@ -32,6 +33,21 @@ abstract final class Formatters {
   static String date(DateTime value) => _date.format(value);
   static String dateTime(DateTime value) => _dateTime.format(value);
   static String time(DateTime value) => _time.format(value);
+
+  /// `dd/MM/yyyy`, used by the classic keyboard-driven trading screens.
+  static String numericDate(DateTime value) => _numericDate.format(value);
+
+  /// Plain amount with two decimals and no currency symbol.
+  static String amount(num value) => value.toStringAsFixed(2);
+
+  /// Quantity without trailing zeros: `12` and `12.50` stay readable.
+  static String quantity(num value) {
+    final asDouble = value.toDouble();
+    if (asDouble == asDouble.roundToDouble()) {
+      return asDouble.toInt().toString();
+    }
+    return asDouble.toStringAsFixed(2);
+  }
 
   static String relativeTime(DateTime timestamp) {
     final now = DateTime.now();

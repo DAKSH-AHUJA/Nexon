@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
@@ -116,10 +117,8 @@ class SettingsPage extends ConsumerWidget {
                     ListTile(
                       leading: const Icon(Icons.person_add_outlined),
                       title: const Text('Add User'),
-                      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text('User management coming in production')),
+                      onTap: () => context.showMessage(
+                        'User management coming in production',
                       ),
                     ),
                   ],

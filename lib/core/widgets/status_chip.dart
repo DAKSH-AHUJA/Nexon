@@ -24,6 +24,12 @@ class StatusChip extends StatelessWidget {
   factory StatusChip.neutral(String label) =>
       StatusChip(label: label, color: AppColors.textTertiaryLight);
 
+  /// Chip for a payment status string such as `paid` or `pending`.
+  factory StatusChip.payment(String status) => StatusChip(
+        label: status,
+        color: status == 'paid' ? AppColors.success : AppColors.warning,
+      );
+
   @override
   Widget build(BuildContext context) {
     return Container(

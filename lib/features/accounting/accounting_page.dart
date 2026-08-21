@@ -5,8 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
+import '../../core/widgets/async_value_view.dart';
+import '../../core/widgets/chart_axis.dart';
+import '../../core/widgets/metric_card.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
+import '../../core/widgets/section_card.dart';
 import '../../services/suppliers_provider.dart';
 
 class AccountingPage extends ConsumerWidget {
@@ -19,9 +23,8 @@ class AccountingPage extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.all(responsive.contentPadding),
-      child: dataAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+      child: AsyncValueView(
+        value: dataAsync,
         data: (data) => _AccountingContent(data: data, responsive: responsive),
       ),
     );
@@ -59,25 +62,29 @@ class _AccountingContent extends StatelessWidget {
             crossAxisSpacing: 12,
             childAspectRatio: 2.2,
             children: [
-              _StatCard(
+              MetricCard(
                 label: 'Cash In',
                 value: Formatters.currency(cashBook['totalIn']),
                 color: AppColors.success,
+                large: true,
               ),
-              _StatCard(
+              MetricCard(
                 label: 'Cash Out',
                 value: Formatters.currency(cashBook['totalOut']),
                 color: AppColors.danger,
+                large: true,
               ),
-              _StatCard(
+              MetricCard(
                 label: 'Closing Balance',
                 value: Formatters.currency(cashBook['closingBalance']),
                 color: AppColors.emerald600,
+                large: true,
               ),
-              _StatCard(
+              MetricCard(
                 label: 'Net Profit',
                 value: Formatters.currency(profit['netProfit']),
                 color: AppColors.blue500,
+                large: true,
               ),
             ],
           ),
@@ -108,37 +115,6 @@ class _AccountingContent extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  const _StatCard(
-      {required this.label, required this.value, required this.color});
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return NexonCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ExpensesList extends StatelessWidget {
   const _ExpensesList({required this.expenses});
 
@@ -146,36 +122,22 @@ class _ExpensesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NexonCard(
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Text('Expenses',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const Spacer(),
-                OutlinedButton(onPressed: () {}, child: const Text('Add')),
-              ],
+    return SectionCard(
+      title: 'Expenses',
+      action: OutlinedButton(onPressed: () {}, child: const Text('Add')),
+      children: [
+        ...expenses.map((e) {
+          final exp = e as Map<String, dynamic>;
+          return ListTile(
+            title: Text(exp['description'] as String),
+            subtitle: Text('${exp['category']} Â· ${exp['paymentMode']}'),
+            trailing: Text(
+              Formatters.currency((exp['amount'] as num).toDouble()),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
-          ),
-          const Divider(height: 1),
-          ...expenses.map((e) {
-            final exp = e as Map<String, dynamic>;
-            return ListTile(
-              title: Text(exp['description'] as String),
-              subtitle: Text('${exp['category']} Â· ${exp['paymentMode']}'),
-              trailing: Text(
-                Formatters.currency((exp['amount'] as num).toDouble()),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            );
-          }),
-        ],
-      ),
+          );
+        }),
+      ],
     );
   }
 }
@@ -187,40 +149,31 @@ class _PaymentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NexonCard(
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('Recent Payments',
-                style: Theme.of(context).textTheme.titleMedium),
-          ),
-          const Divider(height: 1),
-          ...payments.map((p) {
-            final pay = p as Map<String, dynamic>;
-            final isReceipt = pay['type'] == 'customer_receipt';
-            return ListTile(
-              leading: Icon(
-                isReceipt ? Icons.arrow_downward : Icons.arrow_upward,
+    return SectionCard(
+      title: 'Recent Payments',
+      children: [
+        ...payments.map((p) {
+          final pay = p as Map<String, dynamic>;
+          final isReceipt = pay['type'] == 'customer_receipt';
+          return ListTile(
+            leading: Icon(
+              isReceipt ? Icons.arrow_downward : Icons.arrow_upward,
+              color: isReceipt ? AppColors.success : AppColors.danger,
+              size: 20,
+            ),
+            title: Text(pay['party'] as String),
+            subtitle: Text(
+                '${pay['mode']} Â· ${Formatters.date(DateTime.parse(pay['date'] as String))}'),
+            trailing: Text(
+              Formatters.currency((pay['amount'] as num).toDouble()),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
                 color: isReceipt ? AppColors.success : AppColors.danger,
-                size: 20,
               ),
-              title: Text(pay['party'] as String),
-              subtitle: Text(
-                  '${pay['mode']} Â· ${Formatters.date(DateTime.parse(pay['date'] as String))}'),
-              trailing: Text(
-                Formatters.currency((pay['amount'] as num).toDouble()),
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: isReceipt ? AppColors.success : AppColors.danger,
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
@@ -252,25 +205,12 @@ class _ProfitChart extends StatelessWidget {
                 maxY: revenue * 1.1,
                 gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (v, _) {
-                        const labels = ['Revenue', 'COGS', 'Expenses', 'Net'];
-                        final i = v.toInt();
-                        if (i < 0 || i >= labels.length) {
-                          return const SizedBox();
-                        }
-                        return Text(labels[i],
-                            style: const TextStyle(fontSize: 11));
-                      },
-                    ),
+                  leftTitles: hiddenAxisTitles,
+                  topTitles: hiddenAxisTitles,
+                  rightTitles: hiddenAxisTitles,
+                  bottomTitles: categoryAxisTitles(
+                    const ['Revenue', 'COGS', 'Expenses', 'Net'],
+                    style: const TextStyle(fontSize: 11),
                   ),
                 ),
                 borderData: FlBorderData(show: false),

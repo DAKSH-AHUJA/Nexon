@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
 import '../../services/auth_service.dart';
 
@@ -50,15 +52,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
 
     setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invalid username or password.')),
-    );
+    context.showMessage('Invalid username or password.');
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -284,7 +284,7 @@ class _LoginForm extends StatelessWidget {
           Text(
             'Sign in with your company username',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).brightness == Brightness.dark
+                  color: context.isDarkMode
                       ? AppColors.textSecondaryDark
                       : AppColors.textSecondaryLight,
                 ),
