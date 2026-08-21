@@ -106,11 +106,11 @@ void main() {
       expect(responsive.value(mobile: 'm', tablet: 't', desktop: 'd'), 't');
     });
 
-    testWidgets('falls back to the mobile value on tablet without a tablet '
+    testWidgets('falls back to the desktop value on tablet without a tablet '
         'value', (tester) async {
       final responsive = await responsiveFor(tester, const Size(800, 800));
 
-      expect(responsive.value(mobile: 'm', desktop: 'd'), 'm');
+      expect(responsive.value(mobile: 'm', desktop: 'd'), 'd');
     });
 
     testWidgets('returns the desktop value on desktop', (tester) async {

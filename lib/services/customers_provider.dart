@@ -120,10 +120,11 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
 
   void deleteCustomer(String id) {
     final remaining = state.customers.where((c) => c.id != id).toList();
+    final wasSelected = state.selectedId == id;
     state = state.copyWith(
       customers: remaining,
-      clearSelection: state.selectedId == id,
-      selectedId: state.selectedId == id && remaining.isNotEmpty
+      clearSelection: wasSelected && remaining.isEmpty,
+      selectedId: wasSelected && remaining.isNotEmpty
           ? remaining.first.id
           : state.selectedId,
     );

@@ -19,7 +19,7 @@ abstract final class Formatters {
     decimalDigits: 1,
   );
 
-  static final _number = NumberFormat('#,##0');
+  static final _number = NumberFormat('#,##,##0', 'en_IN');
   static final _date = DateFormat('dd MMM yyyy');
   static final _dateTime = DateFormat('dd MMM yyyy, hh:mm a');
   static final _time = DateFormat('hh:mm a');
