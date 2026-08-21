@@ -96,8 +96,7 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
     );
   }
 
-  void setSearch(String query) =>
-      state = state.copyWith(searchQuery: query);
+  void setSearch(String query) => state = state.copyWith(searchQuery: query);
 
   void setFilter(CustomerFilter filter) =>
       state = state.copyWith(filter: filter);
@@ -120,8 +119,7 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
   }
 
   void deleteCustomer(String id) {
-    final remaining =
-        state.customers.where((c) => c.id != id).toList();
+    final remaining = state.customers.where((c) => c.id != id).toList();
     state = state.copyWith(
       customers: remaining,
       clearSelection: state.selectedId == id,
@@ -129,6 +127,51 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
           ? remaining.first.id
           : state.selectedId,
     );
+  }
+
+  Customer? applyCashPayment({
+    required String customerId,
+    required double amount,
+    required String mode,
+    required DateTime receivedAt,
+    String? reference,
+    String? notes,
+  }) {
+    if (amount <= 0) return null;
+
+    final index = state.customers.indexWhere((c) => c.id == customerId);
+    if (index == -1) return null;
+
+    final customer = state.customers[index];
+    final appliedAmount = amount > customer.outstandingBalance
+        ? customer.outstandingBalance
+        : amount;
+    final newBalance = customer.outstandingBalance - appliedAmount;
+    final descriptionParts = [
+      'Cash received',
+      mode,
+      if (reference != null && reference.trim().isNotEmpty)
+        'Ref: ${reference.trim()}',
+      if (notes != null && notes.trim().isNotEmpty) notes.trim(),
+    ];
+
+    final entry = LedgerEntry(
+      date: receivedAt,
+      description: descriptionParts.join(' - '),
+      debit: 0,
+      credit: appliedAmount,
+      balance: newBalance,
+    );
+
+    final updated = customer.copyWith(
+      outstandingBalance: newBalance,
+      ledger: [entry, ...customer.ledger],
+    );
+
+    final customers = [...state.customers];
+    customers[index] = updated;
+    state = state.copyWith(customers: customers, selectedId: updated.id);
+    return updated;
   }
 
   String nextId() {

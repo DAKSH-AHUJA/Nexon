@@ -9,7 +9,7 @@ import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
 import '../../services/suppliers_provider.dart';
 
-enum ReportTab { sales, inventory, customers, profit }
+enum ReportTab { sales, lotWise, customers, profit }
 
 class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
@@ -36,11 +36,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
           children: [
             PageHeader(
               title: 'Reports',
-              subtitle: 'Business analytics and insights',
+              subtitle:
+                  'Statements, outstanding, lot-wise, party-wise, and profit reports',
               actions: [
                 OutlinedButton.icon(
                   onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Export started — CSV saved')),
+                    const SnackBar(content: Text('Export started - CSV saved')),
                   ),
                   icon: const Icon(Icons.download, size: 18),
                   label: const Text('Export'),
@@ -51,8 +52,10 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             SegmentedButton<ReportTab>(
               segments: const [
                 ButtonSegment(value: ReportTab.sales, label: Text('Sales')),
-                ButtonSegment(value: ReportTab.inventory, label: Text('Inventory')),
-                ButtonSegment(value: ReportTab.customers, label: Text('Customers')),
+                ButtonSegment(
+                    value: ReportTab.lotWise, label: Text('Lot Wise')),
+                ButtonSegment(
+                    value: ReportTab.customers, label: Text('Customers')),
                 ButtonSegment(value: ReportTab.profit, label: Text('Profit')),
               ],
               selected: {_tab},
@@ -63,8 +66,10 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
               child: SingleChildScrollView(
                 child: switch (_tab) {
                   ReportTab.sales => _SalesReport(data: data['salesReport']),
-                  ReportTab.inventory => _InventoryReport(data: data['inventoryReport']),
-                  ReportTab.customers => _CustomerReport(data: data['customerReport']),
+                  ReportTab.lotWise =>
+                    _LotWiseReport(data: data['inventoryReport']),
+                  ReportTab.customers =>
+                    _CustomerReport(data: data['customerReport']),
                   ReportTab.profit => _ProfitReport(data: data['profitReport']),
                 },
               ),
@@ -92,7 +97,8 @@ class _SalesReport extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 label: 'Total Sales',
-                value: Formatters.currency((data['totalSales'] as num).toDouble()),
+                value:
+                    Formatters.currency((data['totalSales'] as num).toDouble()),
               ),
             ),
             const SizedBox(width: 12),
@@ -106,7 +112,8 @@ class _SalesReport extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 label: 'Avg Order Value',
-                value: Formatters.currency((data['avgOrderValue'] as num).toDouble()),
+                value: Formatters.currency(
+                    (data['avgOrderValue'] as num).toDouble()),
               ),
             ),
           ],
@@ -120,8 +127,8 @@ class _SalesReport extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (v) =>
-                      FlLine(color: AppColors.lightBorder, strokeWidth: 1),
+                  getDrawingHorizontalLine: (v) => const FlLine(
+                      color: AppColors.lightBorder, strokeWidth: 1),
                 ),
                 titlesData: FlTitlesData(
                   bottomTitles: AxisTitles(
@@ -129,7 +136,9 @@ class _SalesReport extends StatelessWidget {
                       showTitles: true,
                       getTitlesWidget: (v, _) {
                         final i = v.toInt();
-                        if (i < 0 || i >= monthly.length) return const SizedBox();
+                        if (i < 0 || i >= monthly.length) {
+                          return const SizedBox();
+                        }
                         return Text(
                           (monthly[i] as Map)['month'] as String,
                           style: const TextStyle(fontSize: 10),
@@ -137,9 +146,12 @@ class _SalesReport extends StatelessWidget {
                       },
                     ),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
@@ -169,8 +181,8 @@ class _SalesReport extends StatelessWidget {
   }
 }
 
-class _InventoryReport extends StatelessWidget {
-  const _InventoryReport({required this.data});
+class _LotWiseReport extends StatelessWidget {
+  const _LotWiseReport({required this.data});
 
   final Map<String, dynamic> data;
 
@@ -184,14 +196,15 @@ class _InventoryReport extends StatelessWidget {
           children: [
             Expanded(
               child: _MetricCard(
-                label: 'Total Value',
-                value: Formatters.currency((data['totalValue'] as num).toDouble()),
+                label: 'Lot Value',
+                value:
+                    Formatters.currency((data['totalValue'] as num).toDouble()),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _MetricCard(
-                label: 'Low Stock Items',
+                label: 'Open Lots',
                 value: Formatters.number(data['lowStockItems'] as int),
               ),
             ),
@@ -249,7 +262,8 @@ class _CustomerReport extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 label: 'Outstanding',
-                value: Formatters.currency((data['totalOutstanding'] as num).toDouble()),
+                value: Formatters.currency(
+                    (data['totalOutstanding'] as num).toDouble()),
               ),
             ),
           ],
@@ -262,7 +276,8 @@ class _CustomerReport extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Top Customers', style: Theme.of(context).textTheme.titleMedium),
+                child: Text('Top Customers',
+                    style: Theme.of(context).textTheme.titleMedium),
               ),
               const Divider(height: 1),
               ...top.map((c) {
@@ -300,14 +315,16 @@ class _ProfitReport extends StatelessWidget {
             Expanded(
               child: _MetricCard(
                 label: 'Gross Profit',
-                value: Formatters.currency((data['grossProfit'] as num).toDouble()),
+                value: Formatters.currency(
+                    (data['grossProfit'] as num).toDouble()),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _MetricCard(
                 label: 'Net Profit',
-                value: Formatters.currency((data['netProfit'] as num).toDouble()),
+                value:
+                    Formatters.currency((data['netProfit'] as num).toDouble()),
               ),
             ),
             const SizedBox(width: 12),
@@ -333,7 +350,9 @@ class _ProfitReport extends StatelessWidget {
                       showTitles: true,
                       getTitlesWidget: (v, _) {
                         final i = v.toInt();
-                        if (i < 0 || i >= monthly.length) return const SizedBox();
+                        if (i < 0 || i >= monthly.length) {
+                          return const SizedBox();
+                        }
                         return Text(
                           (monthly[i] as Map)['month'] as String,
                           style: const TextStyle(fontSize: 10),
@@ -341,9 +360,12 @@ class _ProfitReport extends StatelessWidget {
                       },
                     ),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: monthly.asMap().entries.map((e) {
@@ -351,7 +373,8 @@ class _ProfitReport extends StatelessWidget {
                     x: e.key,
                     barRods: [
                       BarChartRodData(
-                        toY: ((e.value as Map)['profit'] as num).toDouble() / 100000,
+                        toY: ((e.value as Map)['profit'] as num).toDouble() /
+                            100000,
                         color: AppColors.blue500,
                         width: 20,
                         borderRadius: BorderRadius.circular(4),

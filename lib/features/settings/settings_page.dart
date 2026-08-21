@@ -40,10 +40,11 @@ class SettingsPage extends ConsumerWidget {
                           color: AppColors.emerald500.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.store, color: AppColors.emerald600),
+                        child: const Icon(Icons.store,
+                            color: AppColors.emerald600),
                       ),
-                      title: Text(AppConstants.companyName),
-                      subtitle: Text('GST: ${AppConstants.companyGst}'),
+                      title: const Text(AppConstants.companyName),
+                      subtitle: const Text('GST: ${AppConstants.companyGst}'),
                       trailing: OutlinedButton(
                         onPressed: () {},
                         child: const Text('Edit'),
@@ -61,7 +62,8 @@ class SettingsPage extends ConsumerWidget {
                   title: const Text('Dark Mode'),
                   subtitle: const Text('Use dark theme across the app'),
                   value: themeMode == ThemeMode.dark,
-                  onChanged: (_) => ref.read(themeModeProvider.notifier).toggle(),
+                  onChanged: (_) =>
+                      ref.read(themeModeProvider.notifier).toggle(),
                 ),
               ),
             ),
@@ -77,17 +79,19 @@ class SettingsPage extends ConsumerWidget {
                       trailing: DropdownButton<String>(
                         value: 'classic',
                         items: const [
-                          DropdownMenuItem(value: 'classic', child: Text('Classic White')),
-                          DropdownMenuItem(value: 'modern', child: Text('Modern Green')),
+                          DropdownMenuItem(
+                              value: 'classic', child: Text('Classic White')),
+                          DropdownMenuItem(
+                              value: 'modern', child: Text('Modern Green')),
                         ],
                         onChanged: (_) {},
                       ),
                     ),
                     const Divider(height: 1),
-                    ListTile(
-                      title: const Text('Default GST Rate'),
-                      subtitle: const Text('5% for vegetables'),
-                      trailing: const Text('5%'),
+                    const ListTile(
+                      title: Text('Default GST Rate'),
+                      subtitle: Text('5% for vegetables'),
+                      trailing: Text('5%'),
                     ),
                   ],
                 ),
@@ -100,14 +104,22 @@ class SettingsPage extends ConsumerWidget {
                 padding: EdgeInsets.zero,
                 child: Column(
                   children: [
-                    _UserTile(name: 'Admin User', email: 'admin@freshharvest.in', role: 'Owner'),
+                    const _UserTile(
+                        name: 'Admin User',
+                        email: 'admin@freshharvest.in',
+                        role: 'Owner'),
                     const Divider(height: 1),
-                    _UserTile(name: 'Billing Staff', email: 'billing@freshharvest.in', role: 'Staff'),
+                    const _UserTile(
+                        name: 'Billing Staff',
+                        email: 'billing@freshharvest.in',
+                        role: 'Staff'),
                     ListTile(
                       leading: const Icon(Icons.person_add_outlined),
                       title: const Text('Add User'),
                       onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('User management coming in production')),
+                        const SnackBar(
+                            content:
+                                Text('User management coming in production')),
                       ),
                     ),
                   ],
@@ -183,7 +195,8 @@ class _UserTile extends StatelessWidget {
         backgroundColor: AppColors.blue500.withValues(alpha: 0.12),
         child: Text(
           name[0],
-          style: const TextStyle(color: AppColors.blue600, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+              color: AppColors.blue600, fontWeight: FontWeight.w600),
         ),
       ),
       title: Text(name),

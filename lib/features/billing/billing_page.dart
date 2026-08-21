@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
@@ -106,7 +105,7 @@ class _InvoiceBuilder extends ConsumerWidget {
           Text('New Invoice', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 16),
           DropdownButtonFormField<Customer>(
-            value: draft.customer,
+            initialValue: draft.customer,
             decoration: const InputDecoration(
               labelText: 'Select Customer *',
               isDense: true,
@@ -224,13 +223,15 @@ class _LineItemRow extends ConsumerWidget {
         children: [
           Expanded(
             flex: 3,
-            child: Text(item.product.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(item.product.name,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
           ),
           SizedBox(
             width: 70,
             child: TextFormField(
               initialValue: item.quantity.toString(),
-              decoration: const InputDecoration(labelText: 'Qty', isDense: true),
+              decoration:
+                  const InputDecoration(labelText: 'Qty', isDense: true),
               keyboardType: TextInputType.number,
               onChanged: (v) {
                 final q = double.tryParse(v);
@@ -248,7 +249,8 @@ class _LineItemRow extends ConsumerWidget {
             width: 80,
             child: TextFormField(
               initialValue: item.price.toString(),
-              decoration: const InputDecoration(labelText: 'Price', isDense: true),
+              decoration:
+                  const InputDecoration(labelText: 'Price', isDense: true),
               keyboardType: TextInputType.number,
               onChanged: (v) {
                 final p = double.tryParse(v);
@@ -266,7 +268,8 @@ class _LineItemRow extends ConsumerWidget {
             width: 60,
             child: TextFormField(
               initialValue: item.discount.toString(),
-              decoration: const InputDecoration(labelText: 'Disc%', isDense: true),
+              decoration:
+                  const InputDecoration(labelText: 'Disc%', isDense: true),
               keyboardType: TextInputType.number,
               onChanged: (v) {
                 final d = double.tryParse(v) ?? 0;
@@ -281,7 +284,8 @@ class _LineItemRow extends ConsumerWidget {
           Text(Formatters.currency(item.total)),
           IconButton(
             icon: const Icon(Icons.close, size: 18),
-            onPressed: () => ref.read(billingProvider.notifier).removeItem(index),
+            onPressed: () =>
+                ref.read(billingProvider.notifier).removeItem(index),
           ),
         ],
       ),
@@ -302,7 +306,8 @@ class _InvoiceSummary extends ConsumerWidget {
         children: [
           Text('Summary', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 16),
-          _SummaryRow(label: 'Subtotal', value: Formatters.currency(draft.subtotal)),
+          _SummaryRow(
+              label: 'Subtotal', value: Formatters.currency(draft.subtotal)),
           _SummaryRow(label: 'GST', value: Formatters.currency(draft.totalGst)),
           const Divider(height: 24),
           _SummaryRow(
@@ -348,7 +353,8 @@ class _InvoiceSummary extends ConsumerWidget {
                   onPressed: draft.isValid
                       ? () => ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('WhatsApp share simulated — invoice sent!'),
+                              content: Text(
+                                  'WhatsApp share simulated — invoice sent!'),
                             ),
                           )
                       : null,
@@ -362,7 +368,8 @@ class _InvoiceSummary extends ConsumerWidget {
                   onPressed: draft.isValid
                       ? () => ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('PDF download simulated — saved to Downloads'),
+                              content: Text(
+                                  'PDF download simulated — saved to Downloads'),
                             ),
                           )
                       : null,
@@ -396,8 +403,11 @@ class _SummaryRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontWeight: bold ? FontWeight.w700 : null)),
-          Text(value, style: TextStyle(fontWeight: bold ? FontWeight.w700 : FontWeight.w600)),
+          Text(label,
+              style: TextStyle(fontWeight: bold ? FontWeight.w700 : null)),
+          Text(value,
+              style: TextStyle(
+                  fontWeight: bold ? FontWeight.w700 : FontWeight.w600)),
         ],
       ),
     );

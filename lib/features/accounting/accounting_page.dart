@@ -109,7 +109,8 @@ class _AccountingContent extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.label, required this.value, required this.color});
+  const _StatCard(
+      {required this.label, required this.value, required this.color});
 
   final String label;
   final String value;
@@ -154,7 +155,8 @@ class _ExpensesList extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text('Expenses', style: Theme.of(context).textTheme.titleMedium),
+                Text('Expenses',
+                    style: Theme.of(context).textTheme.titleMedium),
                 const Spacer(),
                 OutlinedButton(onPressed: () {}, child: const Text('Add')),
               ],
@@ -165,7 +167,7 @@ class _ExpensesList extends StatelessWidget {
             final exp = e as Map<String, dynamic>;
             return ListTile(
               title: Text(exp['description'] as String),
-              subtitle: Text('${exp['category']} · ${exp['paymentMode']}'),
+              subtitle: Text('${exp['category']} Â· ${exp['paymentMode']}'),
               trailing: Text(
                 Formatters.currency((exp['amount'] as num).toDouble()),
                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -192,7 +194,8 @@ class _PaymentsList extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Recent Payments', style: Theme.of(context).textTheme.titleMedium),
+            child: Text('Recent Payments',
+                style: Theme.of(context).textTheme.titleMedium),
           ),
           const Divider(height: 1),
           ...payments.map((p) {
@@ -205,7 +208,8 @@ class _PaymentsList extends StatelessWidget {
                 size: 20,
               ),
               title: Text(pay['party'] as String),
-              subtitle: Text('${pay['mode']} · ${Formatters.date(DateTime.parse(pay['date'] as String))}'),
+              subtitle: Text(
+                  '${pay['mode']} Â· ${Formatters.date(DateTime.parse(pay['date'] as String))}'),
               trailing: Text(
                 Formatters.currency((pay['amount'] as num).toDouble()),
                 style: TextStyle(
@@ -237,7 +241,8 @@ class _ProfitChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Profit Summary', style: Theme.of(context).textTheme.titleMedium),
+          Text('Profit Summary',
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 16),
           SizedBox(
             height: 200,
@@ -247,17 +252,23 @@ class _ProfitChart extends StatelessWidget {
                 maxY: revenue * 1.1,
                 gridData: const FlGridData(show: false),
                 titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (v, _) {
                         const labels = ['Revenue', 'COGS', 'Expenses', 'Net'];
                         final i = v.toInt();
-                        if (i < 0 || i >= labels.length) return const SizedBox();
-                        return Text(labels[i], style: const TextStyle(fontSize: 11));
+                        if (i < 0 || i >= labels.length) {
+                          return const SizedBox();
+                        }
+                        return Text(labels[i],
+                            style: const TextStyle(fontSize: 11));
                       },
                     ),
                   ),
@@ -280,7 +291,13 @@ class _ProfitChart extends StatelessWidget {
   BarChartGroupData _bar(int x, double y, Color color) {
     return BarChartGroupData(
       x: x,
-      barRods: [BarChartRodData(toY: y, color: color, width: 32, borderRadius: BorderRadius.circular(4))],
+      barRods: [
+        BarChartRodData(
+            toY: y,
+            color: color,
+            width: 32,
+            borderRadius: BorderRadius.circular(4))
+      ],
     );
   }
 }
@@ -302,7 +319,8 @@ class _BankAccounts extends StatelessWidget {
             final bank = b as Map<String, dynamic>;
             return ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.account_balance, color: AppColors.blue500),
+              leading:
+                  const Icon(Icons.account_balance, color: AppColors.blue500),
               title: Text(bank['name'] as String),
               subtitle: Text(bank['accountNo'] as String),
               trailing: Text(

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,7 +8,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/utils/responsive.dart';
 import '../../services/auth_service.dart';
 
-/// Top application bar with search, notifications, theme toggle, and profile.
+/// Top application bar with search, theme toggle, and profile.
 class AppTopBar extends ConsumerWidget {
   const AppTopBar({
     super.key,
@@ -24,6 +24,7 @@ class AppTopBar extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
     final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final company = ref.watch(authProvider).currentCompany;
 
     return Container(
       height: 64,
@@ -42,7 +43,7 @@ class AppTopBar extends ConsumerWidget {
             ),
           if (!showMenuButton) ...[
             Text(
-              AppConstants.companyName,
+              company?.name ?? AppConstants.appName,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -77,12 +78,6 @@ class AppTopBar extends ConsumerWidget {
             tooltip: 'Toggle theme',
             onTap: () => ref.read(themeModeProvider.notifier).toggle(),
           ),
-          _TopBarIconButton(
-            icon: Icons.notifications_outlined,
-            tooltip: 'Notifications',
-            badge: true,
-            onTap: () => context.go('/notifications'),
-          ),
           const SizedBox(width: 8),
           _ProfileMenu(ref: ref),
         ],
@@ -100,11 +95,12 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       decoration: InputDecoration(
-        hintText: 'Search customers, products, invoices...',
+        hintText: 'Search entries, parties, reports...',
         prefixIcon: Icon(
           Icons.search_rounded,
           size: 20,
-          color: isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
+          color:
+              isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
         ),
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 10),
@@ -125,13 +121,11 @@ class _TopBarIconButton extends StatefulWidget {
     required this.icon,
     required this.tooltip,
     required this.onTap,
-    this.badge = false,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
-  final bool badge;
 
   @override
   State<_TopBarIconButton> createState() => _TopBarIconButtonState();
@@ -165,30 +159,19 @@ class _TopBarIconButtonState extends State<_TopBarIconButton> {
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(widget.icon, size: 20),
-                if (widget.badge)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.orange500,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+            child: Icon(widget.icon, size: 20),
           ),
         ),
       ),
     );
   }
+}
+
+String _initials(String value) {
+  final parts =
+      value.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+  if (parts.isEmpty) return 'AD';
+  return parts.take(2).map((p) => p[0].toUpperCase()).join();
 }
 
 class _ProfileMenu extends StatelessWidget {
@@ -198,6 +181,8 @@ class _ProfileMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final company = ref.watch(authProvider).currentCompany;
+
     return PopupMenuButton<String>(
       offset: const Offset(0, 48),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -212,7 +197,7 @@ class _ProfileMenu extends StatelessWidget {
           ref.read(authProvider.notifier).logout();
           context.go('/login');
         } else if (value == 'settings') {
-          context.go('/settings');
+          context.go('/tools');
         }
       },
       child: MouseRegion(
@@ -233,9 +218,9 @@ class _ProfileMenu extends StatelessWidget {
               CircleAvatar(
                 radius: 14,
                 backgroundColor: AppColors.emerald600.withValues(alpha: 0.2),
-                child: const Text(
-                  'AK',
-                  style: TextStyle(
+                child: Text(
+                  _initials(company?.name ?? 'Admin'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: AppColors.emerald400,
@@ -244,7 +229,7 @@ class _ProfileMenu extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Admin',
+                company?.name ?? 'Admin',
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               const SizedBox(width: 4),

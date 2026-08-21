@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_constants.dart';
-import '../theme/app_colors.dart';
 
 /// Responsive layout utilities.
 class Responsive {

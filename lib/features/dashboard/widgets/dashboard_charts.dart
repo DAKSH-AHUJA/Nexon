@@ -29,12 +29,12 @@ class MonthlySalesChart extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const Spacer(),
-              _ChartLegend(
+              const _ChartLegend(
                 color: AppColors.emerald500,
                 label: 'Sales',
               ),
               const SizedBox(width: 16),
-              _ChartLegend(
+              const _ChartLegend(
                 color: AppColors.blue500,
                 label: 'Profit',
               ),
@@ -111,9 +111,8 @@ class MonthlySalesChart extends StatelessWidget {
                   drawVerticalLine: false,
                   horizontalInterval: maxY / 4,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: isDark
-                        ? AppColors.darkBorder
-                        : AppColors.lightBorder,
+                    color:
+                        isDark ? AppColors.darkBorder : AppColors.lightBorder,
                     strokeWidth: 1,
                   ),
                 ),
@@ -188,7 +187,8 @@ class InventoryChart extends StatelessWidget {
                       sections: List.generate(data.length, (index) {
                         return PieChartSectionData(
                           value: data[index].percentage,
-                          title: '${data[index].percentage.toStringAsFixed(0)}%',
+                          title:
+                              '${data[index].percentage.toStringAsFixed(0)}%',
                           color: _colors[index % _colors.length],
                           radius: 50,
                           titleStyle: const TextStyle(

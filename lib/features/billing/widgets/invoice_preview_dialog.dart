@@ -25,7 +25,8 @@ class InvoicePreviewDialog extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text('Invoice Preview', style: Theme.of(context).textTheme.titleLarge),
+                  Text('Invoice Preview',
+                      style: Theme.of(context).textTheme.titleLarge),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -51,12 +52,12 @@ class InvoicePreviewDialog extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
+                          const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 AppConstants.companyName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimaryLight,
@@ -64,7 +65,8 @@ class InvoicePreviewDialog extends StatelessWidget {
                               ),
                               Text(
                                 'GST: ${AppConstants.companyGst}',
-                                style: const TextStyle(color: AppColors.textSecondaryLight),
+                                style: TextStyle(
+                                    color: AppColors.textSecondaryLight),
                               ),
                             ],
                           ),
@@ -82,7 +84,8 @@ class InvoicePreviewDialog extends StatelessWidget {
                               ),
                               Text(
                                 Formatters.date(DateTime.now()),
-                                style: const TextStyle(color: AppColors.textSecondaryLight),
+                                style: const TextStyle(
+                                    color: AppColors.textSecondaryLight),
                               ),
                             ],
                           ),
@@ -106,12 +109,14 @@ class InvoicePreviewDialog extends StatelessWidget {
                       ),
                       Text(
                         '${customer.address}, ${customer.city}',
-                        style: const TextStyle(color: AppColors.textSecondaryLight),
+                        style: const TextStyle(
+                            color: AppColors.textSecondaryLight),
                       ),
                       if (customer.gst.isNotEmpty)
                         Text(
                           'GST: ${customer.gst}',
-                          style: const TextStyle(color: AppColors.textSecondaryLight),
+                          style: const TextStyle(
+                              color: AppColors.textSecondaryLight),
                         ),
                       const SizedBox(height: 24),
                       _InvoiceTable(draft: draft),
@@ -124,7 +129,8 @@ class InvoicePreviewDialog extends StatelessWidget {
                             _TotalRow('Subtotal', draft.subtotal),
                             _TotalRow('GST', draft.totalGst),
                             const Divider(),
-                            _TotalRow('Grand Total', draft.grandTotal, bold: true),
+                            _TotalRow('Grand Total', draft.grandTotal,
+                                bold: true),
                           ],
                         ),
                       ),
@@ -154,7 +160,8 @@ class InvoicePreviewDialog extends StatelessWidget {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Invoice $invoiceNo created successfully'),
+                          content:
+                              Text('Invoice $invoiceNo created successfully'),
                         ),
                       );
                     },
@@ -246,7 +253,9 @@ class _Cell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: Text(text, style: const TextStyle(fontSize: 12, color: AppColors.textPrimaryLight)),
+      child: Text(text,
+          style:
+              const TextStyle(fontSize: 12, color: AppColors.textPrimaryLight)),
     );
   }
 }

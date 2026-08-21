@@ -1,9 +1,13 @@
 /// Application-wide constants.
 abstract final class AppConstants {
   static const appName = 'Nexon ERP';
-  static const tagline = 'Modern Cloud ERP for Wholesale Businesses';
-  static const companyName = 'FreshHarvest Distributors';
-  static const companyGst = '29AABCF1234Z1Z5';
+  static const tagline =
+      'ERP for vegetable trading, customer dues, and daily cash flow';
+  static const companyName = 'Rajesh Trading Company';
+  static const companyGst = 'GSTIN not configured';
+  static const companyAccountName = companyName;
+  static const companyPassword = '12345';
+  static const businessCategory = 'Wholesale Vegetable Trading';
 
   // Layout breakpoints
   static const mobileBreakpoint = 600.0;

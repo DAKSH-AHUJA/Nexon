@@ -9,7 +9,7 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/utils/responsive.dart';
 import '../../services/auth_service.dart';
 
-/// Premium login screen — accepts any credentials (prototype).
+/// SaaS login screen for company tenant accounts.
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -19,15 +19,15 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController(text: 'rajesh');
+  final _passwordController = TextEditingController(text: '12345');
   bool _rememberMe = false;
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -36,11 +36,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    await Future<void>.delayed(const Duration(milliseconds: 350));
 
     if (!mounted) return;
-    ref.read(authProvider.notifier).login();
-    context.go('/dashboard');
+    final signedIn = ref.read(authProvider.notifier).login(
+          accountCode: _usernameController.text,
+          password: _passwordController.text,
+        );
+
+    if (signedIn) {
+      context.go('/data-entry');
+      return;
+    }
+
+    setState(() => _isLoading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Invalid username or password.')),
+    );
   }
 
   @override
@@ -52,9 +64,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       body: Row(
         children: [
-          if (!responsive.isMobile) Expanded(child: _BrandPanel(isDark: isDark)),
+          if (!responsive.isMobile) const Expanded(child: _BrandPanel()),
           Expanded(
-            flex: responsive.isMobile ? 1 : 1,
             child: Stack(
               children: [
                 _LoginBackground(isDark: isDark),
@@ -65,25 +76,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       constraints: const BoxConstraints(maxWidth: 420),
                       child: _LoginForm(
                         formKey: _formKey,
-                        emailController: _emailController,
+                        usernameController: _usernameController,
                         passwordController: _passwordController,
                         rememberMe: _rememberMe,
                         obscurePassword: _obscurePassword,
                         isLoading: _isLoading,
                         onRememberMeChanged: (v) =>
                             setState(() => _rememberMe = v ?? false),
-                        onTogglePassword: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onTogglePassword: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                         onLogin: _handleLogin,
-                        onForgotPassword: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Password reset will be available in production.',
-                              ),
-                            ),
-                          );
-                        },
                       ),
                     ),
                   ),
@@ -112,23 +115,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 }
 
 class _BrandPanel extends StatelessWidget {
-  const _BrandPanel({required this.isDark});
-
-  final bool isDark;
+  const _BrandPanel();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.lightSurface,
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(48),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _LogoBadge(),
-            const Spacer(),
+            const _LogoBadge(),
+            const SizedBox(height: 56),
             Text(
-              'Streamline your\nwholesale operations',
+              'Multi-company trading ERP',
               style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     height: 1.2,
                   ),
@@ -141,17 +142,20 @@ class _BrandPanel extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 32),
-            _FeatureRow(icon: Icons.inventory_2_outlined, text: 'Real-time inventory tracking'),
+            const _FeatureRow(
+              icon: Icons.business_outlined,
+              text: 'Each company signs in with its own username and password',
+            ),
             const SizedBox(height: 12),
-            _FeatureRow(icon: Icons.receipt_long_outlined, text: 'Smart billing & invoicing'),
+            const _FeatureRow(
+              icon: Icons.receipt_long_outlined,
+              text: 'Vegetable trading entries, reports, backup, and tools',
+            ),
             const SizedBox(height: 12),
-            _FeatureRow(icon: Icons.analytics_outlined, text: 'Actionable business insights'),
-            const Spacer(flex: 2),
-            Text(
-              'Trusted by wholesale distributors across India',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textTertiaryLight,
-                  ),
+            const _FeatureRow(
+              icon: Icons.sync_alt_outlined,
+              text:
+                  'Entries will update account, cash, and caret balances together',
             ),
           ],
         ),
@@ -161,6 +165,8 @@ class _BrandPanel extends StatelessWidget {
 }
 
 class _LogoBadge extends StatelessWidget {
+  const _LogoBadge();
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -175,22 +181,28 @@ class _LogoBadge extends StatelessWidget {
           child: const Icon(Icons.eco_rounded, color: Colors.white, size: 24),
         ),
         const SizedBox(width: 14),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppConstants.appName,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            Text(
-              'Wholesale ERP Platform',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondaryLight,
-                  ),
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppConstants.appName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              Text(
+                'Trading company ERP',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondaryLight,
+                    ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -209,7 +221,12 @@ class _FeatureRow extends StatelessWidget {
       children: [
         Icon(icon, color: AppColors.emerald600, size: 18),
         const SizedBox(width: 12),
-        Text(text, style: Theme.of(context).textTheme.bodyMedium),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
       ],
     );
   }
@@ -231,7 +248,7 @@ class _LoginBackground extends StatelessWidget {
 class _LoginForm extends StatelessWidget {
   const _LoginForm({
     required this.formKey,
-    required this.emailController,
+    required this.usernameController,
     required this.passwordController,
     required this.rememberMe,
     required this.obscurePassword,
@@ -239,11 +256,10 @@ class _LoginForm extends StatelessWidget {
     required this.onRememberMeChanged,
     required this.onTogglePassword,
     required this.onLogin,
-    required this.onForgotPassword,
   });
 
   final GlobalKey<FormState> formKey;
-  final TextEditingController emailController;
+  final TextEditingController usernameController;
   final TextEditingController passwordController;
   final bool rememberMe;
   final bool obscurePassword;
@@ -251,7 +267,6 @@ class _LoginForm extends StatelessWidget {
   final ValueChanged<bool?> onRememberMeChanged;
   final VoidCallback onTogglePassword;
   final VoidCallback onLogin;
-  final VoidCallback onForgotPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +282,7 @@ class _LoginForm extends StatelessWidget {
           ).animate().fadeIn(duration: 400.ms),
           const SizedBox(height: 8),
           Text(
-            'Sign in to your Nexon ERP account',
+            'Sign in with your company username',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? AppColors.textSecondaryDark
@@ -276,19 +291,15 @@ class _LoginForm extends StatelessWidget {
           ).animate().fadeIn(delay: 100.ms),
           const SizedBox(height: 32),
           TextFormField(
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
+            controller: usernameController,
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
-              labelText: 'Email address',
-              prefixIcon: Icon(Icons.email_outlined, size: 20),
+              labelText: 'Username',
+              prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              if (!value.contains('@')) {
-                return 'Please enter a valid email';
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter your username';
               }
               return null;
             },
@@ -316,25 +327,14 @@ class _LoginForm extends StatelessWidget {
               if (value == null || value.isEmpty) {
                 return 'Please enter your password';
               }
-              if (value.length < 4) {
-                return 'Password must be at least 4 characters';
-              }
               return null;
             },
           ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.05),
           const SizedBox(height: 12),
           Row(
             children: [
-              Checkbox(
-                value: rememberMe,
-                onChanged: onRememberMeChanged,
-              ),
+              Checkbox(value: rememberMe, onChanged: onRememberMeChanged),
               Text('Remember me', style: Theme.of(context).textTheme.bodySmall),
-              const Spacer(),
-              TextButton(
-                onPressed: onForgotPassword,
-                child: const Text('Forgot password?'),
-              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -358,8 +358,9 @@ class _LoginForm extends StatelessWidget {
           const SizedBox(height: 24),
           Center(
             child: Text(
-              'Demo mode — use any email and password',
+              'Rajesh Trading Company: username rajesh, password 12345',
               style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
             ),
           ),
         ],

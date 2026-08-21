@@ -65,7 +65,8 @@ class NotificationsPage extends StatelessWidget {
               if (unread > 0)
                 TextButton(
                   onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All notifications marked as read')),
+                    const SnackBar(
+                        content: Text('All notifications marked as read')),
                   ),
                   child: const Text('Mark all read'),
                 ),
@@ -88,11 +89,14 @@ class NotificationsPage extends StatelessWidget {
                           child: Text(
                             n.title,
                             style: TextStyle(
-                              fontWeight: n.read ? FontWeight.w500 : FontWeight.w700,
+                              fontWeight:
+                                  n.read ? FontWeight.w500 : FontWeight.w700,
                             ),
                           ),
                         ),
-                        if (!n.read) StatusChip(label: 'New', color: AppColors.orange500),
+                        if (!n.read)
+                          const StatusChip(
+                              label: 'New', color: AppColors.orange500),
                       ],
                     ),
                     subtitle: Column(
@@ -146,10 +150,19 @@ class _NotificationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (icon, color) = switch (type) {
-      NotificationType.alert => (Icons.warning_amber_rounded, AppColors.warning),
+      NotificationType.alert => (
+          Icons.warning_amber_rounded,
+          AppColors.warning
+        ),
       NotificationType.payment => (Icons.payments_outlined, AppColors.success),
-      NotificationType.invoice => (Icons.receipt_long_outlined, AppColors.emerald600),
-      NotificationType.inventory => (Icons.inventory_2_outlined, AppColors.blue500),
+      NotificationType.invoice => (
+          Icons.receipt_long_outlined,
+          AppColors.emerald600
+        ),
+      NotificationType.inventory => (
+          Icons.inventory_2_outlined,
+          AppColors.blue500
+        ),
       NotificationType.customer => (Icons.person_add_outlined, AppColors.info),
     };
 

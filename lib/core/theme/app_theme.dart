@@ -42,7 +42,8 @@ abstract final class AppTheme {
       onSecondary: Colors.white,
       tertiary: AppColors.orange500,
       surface: surface,
-      onSurface: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+      onSurface:
+          isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
       error: AppColors.danger,
     );
 
@@ -57,8 +58,10 @@ abstract final class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
-        foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-        systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        foregroundColor:
+            isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        systemOverlayStyle:
+            isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         titleTextStyle: textTheme.titleLarge,
       ),
       cardTheme: CardThemeData(
@@ -77,8 +80,10 @@ abstract final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.darkCardElevated : AppColors.lightBackground,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        fillColor:
+            isDark ? AppColors.darkCardElevated : AppColors.lightBackground,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: border),
@@ -100,10 +105,13 @@ abstract final class AppTheme {
           borderSide: const BorderSide(color: AppColors.danger, width: 2),
         ),
         labelStyle: textTheme.bodyMedium?.copyWith(
-          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          color: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondaryLight,
         ),
         hintStyle: textTheme.bodyMedium?.copyWith(
-          color: isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
+          color:
+              isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -112,33 +120,42 @@ abstract final class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle:
+              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+          foregroundColor:
+              isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           side: BorderSide(color: border),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle:
+              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.emerald500,
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle:
+              textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return AppColors.emerald600;
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.emerald600;
+          }
           return null;
         }),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
@@ -146,7 +163,8 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: isDark ? AppColors.darkCardElevated : AppColors.textPrimaryLight,
+        backgroundColor:
+            isDark ? AppColors.darkCardElevated : AppColors.textPrimaryLight,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: card,
@@ -154,7 +172,8 @@ abstract final class AppTheme {
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkCardElevated : AppColors.textPrimaryLight,
+          color:
+              isDark ? AppColors.darkCardElevated : AppColors.textPrimaryLight,
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -163,7 +182,8 @@ abstract final class AppTheme {
         indicatorColor: AppColors.emerald600.withValues(alpha: 0.15),
         selectedIconTheme: const IconThemeData(color: AppColors.emerald400),
         unselectedIconTheme: IconThemeData(
-          color: isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
+          color:
+              isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
         ),
         labelType: NavigationRailLabelType.all,
       ),

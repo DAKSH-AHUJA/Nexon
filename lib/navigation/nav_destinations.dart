@@ -1,42 +1,18 @@
 import 'package:flutter/material.dart';
 
-/// Navigation destinations for the ERP shell.
+/// Main sections for the trading ERP shell.
 enum NavDestination {
-  dashboard(
-    label: 'Dashboard',
-    icon: Icons.dashboard_outlined,
-    selectedIcon: Icons.dashboard_rounded,
-    route: '/dashboard',
+  dataEntry(
+    label: 'Data Entry',
+    icon: Icons.edit_note_outlined,
+    selectedIcon: Icons.edit_note_rounded,
+    route: '/data-entry',
   ),
-  customers(
-    label: 'Customers',
-    icon: Icons.people_outline_rounded,
-    selectedIcon: Icons.people_rounded,
-    route: '/customers',
-  ),
-  inventory(
-    label: 'Inventory',
-    icon: Icons.inventory_2_outlined,
-    selectedIcon: Icons.inventory_2_rounded,
-    route: '/inventory',
-  ),
-  suppliers(
-    label: 'Suppliers',
-    icon: Icons.local_shipping_outlined,
-    selectedIcon: Icons.local_shipping_rounded,
-    route: '/suppliers',
-  ),
-  billing(
-    label: 'Billing',
-    icon: Icons.receipt_long_outlined,
-    selectedIcon: Icons.receipt_long_rounded,
-    route: '/billing',
-  ),
-  accounting(
-    label: 'Accounting',
-    icon: Icons.account_balance_wallet_outlined,
-    selectedIcon: Icons.account_balance_wallet_rounded,
-    route: '/accounting',
+  correctEntry(
+    label: 'Correct Entry',
+    icon: Icons.tune_outlined,
+    selectedIcon: Icons.tune_rounded,
+    route: '/correct-entry',
   ),
   reports(
     label: 'Reports',
@@ -44,17 +20,23 @@ enum NavDestination {
     selectedIcon: Icons.bar_chart_rounded,
     route: '/reports',
   ),
-  notifications(
-    label: 'Notifications',
-    icon: Icons.notifications_outlined,
-    selectedIcon: Icons.notifications_rounded,
-    route: '/notifications',
+  backup(
+    label: 'Back up',
+    icon: Icons.backup_outlined,
+    selectedIcon: Icons.backup_rounded,
+    route: '/backup',
   ),
-  settings(
-    label: 'Settings',
-    icon: Icons.settings_outlined,
-    selectedIcon: Icons.settings_rounded,
-    route: '/settings',
+  restore(
+    label: 'Restore',
+    icon: Icons.restore_page_outlined,
+    selectedIcon: Icons.restore_page_rounded,
+    route: '/restore',
+  ),
+  tools(
+    label: 'Tools',
+    icon: Icons.build_outlined,
+    selectedIcon: Icons.build_rounded,
+    route: '/tools',
   );
 
   const NavDestination({
@@ -71,7 +53,9 @@ enum NavDestination {
 
   static NavDestination? fromRoute(String route) {
     for (final dest in NavDestination.values) {
-      if (dest.route == route) return dest;
+      if (route == dest.route || route.startsWith('${dest.route}/')) {
+        return dest;
+      }
     }
     return null;
   }
