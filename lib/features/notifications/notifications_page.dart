@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
@@ -64,10 +65,8 @@ class NotificationsPage extends StatelessWidget {
             actions: [
               if (unread > 0)
                 TextButton(
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('All notifications marked as read')),
-                  ),
+                  onPressed: () =>
+                      context.showMessage('All notifications marked as read'),
                   child: const Text('Mark all read'),
                 ),
             ],

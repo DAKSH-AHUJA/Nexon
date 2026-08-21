@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/messages.dart';
 import '../../../models/product_model.dart';
 import '../../../services/products_provider.dart';
 
@@ -49,9 +50,7 @@ class _StockAdjustmentDialogState extends ConsumerState<StockAdjustmentDialog> {
         );
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Stock updated for ${widget.product.name}')),
-    );
+    context.showMessage('Stock updated for ${widget.product.name}');
   }
 
   @override
@@ -80,7 +79,8 @@ class _StockAdjustmentDialogState extends ConsumerState<StockAdjustmentDialog> {
                   if (v == null || v.isEmpty) return 'Required';
                   final n = double.tryParse(v);
                   if (n == null || n <= 0) return 'Enter valid quantity';
-                  if (widget.type == 'stock_out' && n > widget.product.currentStock) {
+                  if (widget.type == 'stock_out' &&
+                      n > widget.product.currentStock) {
                     return 'Exceeds available stock';
                   }
                   return null;
@@ -97,7 +97,9 @@ class _StockAdjustmentDialogState extends ConsumerState<StockAdjustmentDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel')),
         ElevatedButton(onPressed: _submit, child: const Text('Confirm')),
       ],
     );

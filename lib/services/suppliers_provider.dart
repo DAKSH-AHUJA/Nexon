@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/utils/collection_utils.dart';
 import '../models/supplier_model.dart';
 import 'data_service.dart';
 
@@ -20,21 +21,13 @@ class SuppliersState {
 
   List<Supplier> get filtered {
     if (searchQuery.isEmpty) return suppliers;
-    final q = searchQuery.toLowerCase();
     return suppliers
-        .where(
-          (s) =>
-              s.name.toLowerCase().contains(q) ||
-              s.phone.contains(q) ||
-              s.city.toLowerCase().contains(q),
-        )
+        .where((s) => matchesQuery(searchQuery, [s.name, s.phone, s.city]))
         .toList();
   }
 
-  Supplier? get selected {
-    if (selectedId == null) return null;
-    return suppliers.where((s) => s.id == selectedId).firstOrNull;
-  }
+  Supplier? get selected =>
+      suppliers.firstWhereOrNull((s) => s.id == selectedId);
 
   SuppliersState copyWith({
     List<Supplier>? suppliers,
@@ -65,10 +58,11 @@ class SuppliersNotifier extends StateNotifier<SuppliersState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final service = _ref.read(jsonDataServiceProvider);
-      final json = await service.loadJson('suppliers.json');
-      final list = (json['suppliers'] as List<dynamic>)
-          .map((e) => Supplier.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final list = await service.loadList(
+        'suppliers.json',
+        'suppliers',
+        Supplier.fromJson,
+      );
       state = state.copyWith(
         suppliers: list,
         isLoading: false,
@@ -91,7 +85,8 @@ final suppliersProvider =
   return SuppliersNotifier(ref);
 });
 
-final accountingDataProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final accountingDataProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
   final service = ref.watch(jsonDataServiceProvider);
   return service.loadJson('expenses.json');
 });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/theme_context.dart';
 
 /// Placeholder page for modules under development.
 class FeaturePlaceholderPage extends StatelessWidget {
@@ -41,11 +42,10 @@ class FeaturePlaceholderPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: context.mutedText),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

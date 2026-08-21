@@ -6,7 +6,6 @@ abstract final class AppConstants {
   static const companyName = 'Rajesh Trading Company';
   static const companyGst = 'GSTIN not configured';
   static const companyAccountName = companyName;
-  static const companyPassword = '12345';
   static const businessCategory = 'Wholesale Vegetable Trading';
 
   // Layout breakpoints

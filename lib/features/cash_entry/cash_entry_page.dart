@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/collection_utils.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/empty_state.dart';
@@ -50,7 +51,7 @@ class _CashEntryPageState extends ConsumerState<CashEntryPage> {
         : (customersWithDues.isNotEmpty ? customersWithDues.first.id : null);
     final selectedCustomer = selectedId == null
         ? null
-        : customersWithDues.firstWhere((c) => c.id == selectedId);
+        : customersWithDues.firstWhereOrNull((c) => c.id == selectedId);
     final receipts = _cashReceipts(state.customers);
     final totalOutstanding = state.customers.fold<double>(
       0,

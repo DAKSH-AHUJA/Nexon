@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/utils/collection_utils.dart';
 import '../models/customer_model.dart';
 import 'data_service.dart';
 
@@ -35,24 +36,16 @@ class CustomersState {
     }
 
     if (searchQuery.isNotEmpty) {
-      final q = searchQuery.toLowerCase();
       result = result
-          .where(
-            (c) =>
-                c.name.toLowerCase().contains(q) ||
-                c.phone.contains(q) ||
-                c.city.toLowerCase().contains(q),
-          )
+          .where((c) => matchesQuery(searchQuery, [c.name, c.phone, c.city]))
           .toList();
     }
 
     return result;
   }
 
-  Customer? get selected {
-    if (selectedId == null) return null;
-    return customers.where((c) => c.id == selectedId).firstOrNull;
-  }
+  Customer? get selected =>
+      customers.firstWhereOrNull((c) => c.id == selectedId);
 
   CustomersState copyWith({
     List<Customer>? customers,
@@ -87,10 +80,11 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final service = _ref.read(jsonDataServiceProvider);
-      final json = await service.loadJson('customers.json');
-      final list = (json['customers'] as List<dynamic>)
-          .map((e) => Customer.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final list = await service.loadList(
+        'customers.json',
+        'customers',
+        Customer.fromJson,
+      );
       state = state.copyWith(
         customers: list,
         isLoading: false,
@@ -128,10 +122,11 @@ class CustomersNotifier extends StateNotifier<CustomersState> {
 
   void deleteCustomer(String id) {
     final remaining = state.customers.where((c) => c.id != id).toList();
+    final wasSelected = state.selectedId == id;
     state = state.copyWith(
       customers: remaining,
-      clearSelection: state.selectedId == id,
-      selectedId: state.selectedId == id && remaining.isNotEmpty
+      clearSelection: wasSelected && remaining.isEmpty,
+      selectedId: wasSelected && remaining.isNotEmpty
           ? remaining.first.id
           : state.selectedId,
     );

@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../core/theme/theme_provider.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
 import '../../services/auth_service.dart';
 
@@ -19,8 +21,8 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController(text: 'rajesh');
-  final _passwordController = TextEditingController(text: '12345');
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -50,15 +52,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
 
     setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invalid username or password.')),
-    );
+    context.showMessage('Invalid username or password.');
   }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final themeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
@@ -284,7 +284,7 @@ class _LoginForm extends StatelessWidget {
           Text(
             'Sign in with your company username',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).brightness == Brightness.dark
+                  color: context.isDarkMode
                       ? AppColors.textSecondaryDark
                       : AppColors.textSecondaryLight,
                 ),
@@ -355,14 +355,6 @@ class _LoginForm extends StatelessWidget {
                   : const Text('Sign In'),
             ),
           ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.05),
-          const SizedBox(height: 24),
-          Center(
-            child: Text(
-              'Rajesh Trading Company: username rajesh, password 12345',
-              style: Theme.of(context).textTheme.bodySmall,
-              textAlign: TextAlign.center,
-            ),
-          ),
         ],
       ),
     );

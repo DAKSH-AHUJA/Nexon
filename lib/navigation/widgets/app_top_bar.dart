@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/utils/responsive.dart';
 import '../../services/auth_service.dart';
@@ -21,7 +22,7 @@ class AppTopBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final themeMode = ref.watch(themeModeProvider);
     final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
     final company = ref.watch(authProvider).currentCompany;
@@ -136,7 +137,7 @@ class _TopBarIconButtonState extends State<_TopBarIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
@@ -207,7 +208,7 @@ class _ProfileMenu extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Theme.of(context).brightness == Brightness.dark
+              color: context.isDarkMode
                   ? AppColors.darkBorder
                   : AppColors.lightBorder,
             ),
