@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/error_state.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/status_chip.dart';
@@ -21,6 +22,13 @@ class SuppliersPage extends ConsumerWidget {
 
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.errorMessage != null) {
+      return ErrorState(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(suppliersProvider.notifier).load(),
+      );
     }
 
     return Padding(

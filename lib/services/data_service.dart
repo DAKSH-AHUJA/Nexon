@@ -10,7 +10,16 @@ class JsonDataService {
   Future<Map<String, dynamic>> loadJson(String fileName) async {
     final jsonString =
         await rootBundle.loadString('assets/dummy_data/$fileName');
-    return json.decode(jsonString) as Map<String, dynamic>;
+    final dynamic decoded;
+    try {
+      decoded = json.decode(jsonString);
+    } on FormatException catch (e) {
+      throw FormatException('Invalid JSON in $fileName: ${e.message}');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw FormatException('Expected a JSON object in $fileName');
+    }
+    return decoded;
   }
 }
 

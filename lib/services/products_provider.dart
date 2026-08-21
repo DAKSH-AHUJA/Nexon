@@ -14,6 +14,7 @@ class ProductsState {
     this.filter = ProductFilter.all,
     this.selectedId,
     this.isLoading = false,
+    this.errorMessage,
   });
 
   final List<Product> products;
@@ -23,6 +24,7 @@ class ProductsState {
   final ProductFilter filter;
   final String? selectedId;
   final bool isLoading;
+  final String? errorMessage;
 
   List<String> get categories =>
       products.map((p) => p.category).toSet().toList()..sort();
@@ -62,11 +64,7 @@ class ProductsState {
 
   Product? get selected {
     if (selectedId == null) return null;
-    try {
-      return products.firstWhere((p) => p.id == selectedId);
-    } catch (_) {
-      return null;
-    }
+    return products.where((p) => p.id == selectedId).firstOrNull;
   }
 
   ProductsState copyWith({
@@ -77,8 +75,10 @@ class ProductsState {
     ProductFilter? filter,
     String? selectedId,
     bool? isLoading,
+    String? errorMessage,
     bool clearCategory = false,
     bool clearSelection = false,
+    bool clearError = false,
   }) {
     return ProductsState(
       products: products ?? this.products,
@@ -89,6 +89,7 @@ class ProductsState {
       filter: filter ?? this.filter,
       selectedId: clearSelection ? null : (selectedId ?? this.selectedId),
       isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
@@ -96,30 +97,37 @@ class ProductsState {
 class ProductsNotifier extends StateNotifier<ProductsState> {
   ProductsNotifier(this._ref)
       : super(const ProductsState(products: [], transactions: [])) {
-    _load();
+    load();
   }
 
   final Ref _ref;
   int _txnCounter = 100;
 
-  Future<void> _load() async {
-    state = state.copyWith(isLoading: true);
-    final service = _ref.read(jsonDataServiceProvider);
-    final productsJson = await service.loadJson('products.json');
-    final inventoryJson = await service.loadJson('inventory.json');
+  Future<void> load() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final service = _ref.read(jsonDataServiceProvider);
+      final productsJson = await service.loadJson('products.json');
+      final inventoryJson = await service.loadJson('inventory.json');
 
-    final products = (productsJson['products'] as List<dynamic>)
-        .map((e) => Product.fromJson(e as Map<String, dynamic>))
-        .toList();
-    final transactions = (inventoryJson['transactions'] as List<dynamic>)
-        .map((e) => InventoryTransaction.fromJson(e as Map<String, dynamic>))
-        .toList();
+      final products = (productsJson['products'] as List<dynamic>)
+          .map((e) => Product.fromJson(e as Map<String, dynamic>))
+          .toList();
+      final transactions = (inventoryJson['transactions'] as List<dynamic>)
+          .map((e) => InventoryTransaction.fromJson(e as Map<String, dynamic>))
+          .toList();
 
-    state = state.copyWith(
-      products: products,
-      transactions: transactions,
-      isLoading: false,
-    );
+      state = state.copyWith(
+        products: products,
+        transactions: transactions,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Failed to load inventory: $e',
+      );
+    }
   }
 
   void setSearch(String query) => state = state.copyWith(searchQuery: query);

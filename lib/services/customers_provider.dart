@@ -12,6 +12,7 @@ class CustomersState {
     this.filter = CustomerFilter.all,
     this.selectedId,
     this.isLoading = false,
+    this.errorMessage,
   });
 
   final List<Customer> customers;
@@ -19,6 +20,7 @@ class CustomersState {
   final CustomerFilter filter;
   final String? selectedId;
   final bool isLoading;
+  final String? errorMessage;
 
   List<Customer> get filtered {
     var result = customers;
@@ -49,11 +51,7 @@ class CustomersState {
 
   Customer? get selected {
     if (selectedId == null) return null;
-    try {
-      return customers.firstWhere((c) => c.id == selectedId);
-    } catch (_) {
-      return null;
-    }
+    return customers.where((c) => c.id == selectedId).firstOrNull;
   }
 
   CustomersState copyWith({
@@ -62,7 +60,9 @@ class CustomersState {
     CustomerFilter? filter,
     String? selectedId,
     bool? isLoading,
+    String? errorMessage,
     bool clearSelection = false,
+    bool clearError = false,
   }) {
     return CustomersState(
       customers: customers ?? this.customers,
@@ -70,30 +70,38 @@ class CustomersState {
       filter: filter ?? this.filter,
       selectedId: clearSelection ? null : (selectedId ?? this.selectedId),
       isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
 
 class CustomersNotifier extends StateNotifier<CustomersState> {
   CustomersNotifier(this._ref) : super(const CustomersState(customers: [])) {
-    _load();
+    load();
   }
 
   final Ref _ref;
   int _idCounter = 100;
 
-  Future<void> _load() async {
-    state = state.copyWith(isLoading: true);
-    final service = _ref.read(jsonDataServiceProvider);
-    final json = await service.loadJson('customers.json');
-    final list = (json['customers'] as List<dynamic>)
-        .map((e) => Customer.fromJson(e as Map<String, dynamic>))
-        .toList();
-    state = state.copyWith(
-      customers: list,
-      isLoading: false,
-      selectedId: list.isNotEmpty ? list.first.id : null,
-    );
+  Future<void> load() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final service = _ref.read(jsonDataServiceProvider);
+      final json = await service.loadJson('customers.json');
+      final list = (json['customers'] as List<dynamic>)
+          .map((e) => Customer.fromJson(e as Map<String, dynamic>))
+          .toList();
+      state = state.copyWith(
+        customers: list,
+        isLoading: false,
+        selectedId: list.isNotEmpty ? list.first.id : null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Failed to load customers: $e',
+      );
+    }
   }
 
   void setSearch(String query) => state = state.copyWith(searchQuery: query);
