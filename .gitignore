@@ -47,3 +47,6 @@ windows/flutter/ephemeral/
 .env
 .env.*
 
+
+# Test coverage
+/coverage/
