@@ -1,0 +1,35 @@
+## My Recommendation: __Flutter PWA (Progressive Web App)__
+
+Given your current codebase and requirements, I'd recommend converting this to a __Flutter PWA__ — it gives you the best of both worlds:
+
+### Why PWA over pure web or installed app:
+
+1. __Single codebase__ — Deploy to web, and the same code can still build Windows/Android/iOS apps later
+2. __Offline-first__ — Service workers cache the app shell; local SQLite/Drift database stores data offline
+3. __Background sync__ — When connection returns, sync queue fires automatically
+4. __Installable__ — Users can "install" it to their desktop/home screen like a native app
+5. __No app store needed__ — Just share a URL, works immediately
+6. __Real-time sync__ — Use Supabase/Firebase for live multi-user sync
+
+### Architecture for your needs:
+
+```javascript
+┌─────────────────────────────────────────────┐
+│              Flutter PWA                     │
+├─────────────────────────────────────────────┤
+│  UI Layer (your existing widgets)           │
+├─────────────────────────────────────────────┤
+│  Riverpod State Management (existing)       │
+├─────────────────────────────────────────────┤
+│  Sync Engine (new)                          │
+│  ├── Local DB (Drift/SQLite) - offline      │
+│  ├── Sync Queue (pending changes)           │
+│  └── Remote (Supabase/Firebase) - cloud     │
+├─────────────────────────────────────────────┤
+│  Background Sync + Connectivity Monitor     │
+└─────────────────────────────────────────────┘
+```
+
+supplier brigns maal in carret and entry should be in caret 
+
+tamatar aaya khali caret mei aaya item - tamatar caret
