@@ -13,10 +13,9 @@ class PurcSpatPage extends StatefulWidget {
 }
 
 class _PurcSpatPageState extends State<PurcSpatPage> {
-  final _purchaseScroll = ScrollController();
-  final _salesScroll = ScrollController();
-  final _purchaseFocus = FocusNode(debugLabel: 'Purchase truck list');
-  final _salesFocus = FocusNode(debugLabel: 'Customer sale list');
+  final _truckScroll = ScrollController();
+  final _saleScroll = ScrollController();
+  final _pageFocus = FocusNode(debugLabel: 'Purc/SPAT module');
 
   final List<_PurchaseLot> _lots = [
     _PurchaseLot(
@@ -105,7 +104,7 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
 
   int _selectedLotIndex = 0;
   int _selectedSaleIndex = 0;
-  bool _salesAreaActive = false;
+  bool _showingTruckDetail = false;
 
   _PurchaseLot get _selectedLot => _lots[_selectedLotIndex];
 
@@ -113,26 +112,22 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _purchaseFocus.requestFocus();
+      if (mounted) _pageFocus.requestFocus();
     });
   }
 
   @override
   void dispose() {
-    _purchaseScroll.dispose();
-    _salesScroll.dispose();
-    _purchaseFocus.dispose();
-    _salesFocus.dispose();
+    _truckScroll.dispose();
+    _saleScroll.dispose();
+    _pageFocus.dispose();
     super.dispose();
   }
 
   void _move(int delta) {
-    if (_salesAreaActive) {
+    if (_showingTruckDetail) {
       final sales = _selectedLot.sales;
-      if (sales.isEmpty) {
-        if (delta > 0) _addSale();
-        return;
-      }
+      if (sales.isEmpty) return;
       if (delta > 0 && _selectedSaleIndex == sales.length - 1) {
         _addSale();
         return;
@@ -143,7 +138,7 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
           sales.length - 1,
         );
       });
-      _scrollToSelected(_salesScroll, _selectedSaleIndex);
+      _scrollToSelected(_saleScroll, _selectedSaleIndex);
       return;
     }
 
@@ -152,13 +147,13 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
           (_selectedLotIndex + delta).clamp(0, _lots.length - 1);
       _selectedSaleIndex = 0;
     });
-    _scrollToSelected(_purchaseScroll, _selectedLotIndex);
+    _scrollToSelected(_truckScroll, _selectedLotIndex);
   }
 
   void _scrollToSelected(ScrollController controller, int index) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.hasClients) return;
-      final target = (index * 42.0).clamp(
+      final target = (index * 58.0).clamp(
         0.0,
         controller.position.maxScrollExtent,
       );
@@ -170,14 +165,17 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
     });
   }
 
-  void _activateSalesArea() {
-    setState(() => _salesAreaActive = true);
-    _salesFocus.requestFocus();
+  void _openTruckDetail() {
+    setState(() {
+      _showingTruckDetail = true;
+      _selectedSaleIndex = 0;
+    });
+    _pageFocus.requestFocus();
   }
 
-  void _activatePurchaseArea() {
-    setState(() => _salesAreaActive = false);
-    _purchaseFocus.requestFocus();
+  void _backToTruckList() {
+    setState(() => _showingTruckDetail = false);
+    _pageFocus.requestFocus();
   }
 
   Future<void> _addPurchase() async {
@@ -190,9 +188,10 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
       _lots.add(lot);
       _selectedLotIndex = _lots.length - 1;
       _selectedSaleIndex = 0;
-      _salesAreaActive = false;
+      _showingTruckDetail = false;
     });
-    _purchaseFocus.requestFocus();
+    _scrollToSelected(_truckScroll, _selectedLotIndex);
+    _pageFocus.requestFocus();
   }
 
   Future<void> _editSelectedPurchase() async {
@@ -205,7 +204,7 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
     );
     if (updatedLot == null) return;
     setState(() => _lots[_selectedLotIndex] = updatedLot);
-    _purchaseFocus.requestFocus();
+    _pageFocus.requestFocus();
   }
 
   Future<void> _addSale() async {
@@ -220,9 +219,10 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
       final updatedSales = [...lot.sales, sale];
       _lots[_selectedLotIndex] = lot.copyWith(sales: updatedSales);
       _selectedSaleIndex = updatedSales.length - 1;
-      _salesAreaActive = true;
+      _showingTruckDetail = true;
     });
-    _salesFocus.requestFocus();
+    _scrollToSelected(_saleScroll, _selectedSaleIndex);
+    _pageFocus.requestFocus();
   }
 
   int get _nextSrNo {
@@ -239,17 +239,18 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
       bindings: {
         const SingleActivator(LogicalKeyboardKey.arrowDown): () => _move(1),
         const SingleActivator(LogicalKeyboardKey.arrowUp): () => _move(-1),
-        const SingleActivator(LogicalKeyboardKey.arrowRight):
-            _activateSalesArea,
-        const SingleActivator(LogicalKeyboardKey.arrowLeft):
-            _activatePurchaseArea,
-        const SingleActivator(LogicalKeyboardKey.enter): _editSelectedPurchase,
-        const SingleActivator(LogicalKeyboardKey.numpadEnter):
-            _editSelectedPurchase,
+        const SingleActivator(LogicalKeyboardKey.enter): _openTruckDetail,
+        const SingleActivator(LogicalKeyboardKey.numpadEnter): _openTruckDetail,
+        const SingleActivator(LogicalKeyboardKey.arrowRight): _openTruckDetail,
+        const SingleActivator(LogicalKeyboardKey.f2): _editSelectedPurchase,
         const SingleActivator(LogicalKeyboardKey.f5): _addSale,
         const SingleActivator(LogicalKeyboardKey.f6): _addPurchase,
+        const SingleActivator(LogicalKeyboardKey.escape): () {
+          if (_showingTruckDetail) _backToTruckList();
+        },
       },
       child: Focus(
+        focusNode: _pageFocus,
         autofocus: true,
         child: Container(
           color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
@@ -259,66 +260,81 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 PageHeader(
-                  title: 'Purchase / Sale Entry Module',
-                  subtitle:
-                      'Truck-wise vegetable purchase and customer-wise sale details',
-                  actions: [
-                    OutlinedButton.icon(
-                      onPressed: _editSelectedPurchase,
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: const Text('Edit Truck'),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _addSale,
-                      icon:
-                          const Icon(Icons.person_add_alt_1_outlined, size: 18),
-                      label: const Text('Add Customer'),
-                    ),
-                  ],
+                  title: _showingTruckDetail
+                      ? 'Customer Sales From Truck ${_selectedLot.srNo}'
+                      : 'Purchase / Sale Entry Module',
+                  subtitle: _showingTruckDetail
+                      ? '${_selectedLot.partyName} - ${_selectedLot.item}'
+                      : 'Select a truck, then press Enter or click to enter customer sales',
+                  actions: _showingTruckDetail
+                      ? [
+                          OutlinedButton.icon(
+                            onPressed: _backToTruckList,
+                            icon:
+                                const Icon(Icons.arrow_back_rounded, size: 18),
+                            label: const Text('Truck List'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _editSelectedPurchase,
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            label: const Text('F2 Edit Truck'),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: _addSale,
+                            icon: const Icon(
+                              Icons.person_add_alt_1_outlined,
+                              size: 18,
+                            ),
+                            label: const Text('Add Customer'),
+                          ),
+                        ]
+                      : [
+                          OutlinedButton.icon(
+                            onPressed: _addPurchase,
+                            icon: const Icon(
+                              Icons.local_shipping_outlined,
+                              size: 18,
+                            ),
+                            label: const Text('Add Truck'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _editSelectedPurchase,
+                            icon: const Icon(Icons.edit_outlined, size: 18),
+                            label: const Text('F2 Edit'),
+                          ),
+                        ],
                 ),
                 const SizedBox(height: 14),
                 Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: Focus(
-                          focusNode: _purchaseFocus,
-                          child: _PurchaseTable(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 160),
+                    child: _showingTruckDetail
+                        ? _TruckDetailView(
+                            key: ValueKey(_selectedLot.srNo),
+                            lot: _selectedLot,
+                            selectedSaleIndex: _selectedSaleIndex,
+                            scrollController: _saleScroll,
+                            onSelectedSale: (index) {
+                              setState(() => _selectedSaleIndex = index);
+                            },
+                          )
+                        : _TruckListView(
+                            key: const ValueKey('truck-list'),
                             lots: _lots,
                             selectedIndex: _selectedLotIndex,
-                            active: !_salesAreaActive,
-                            scrollController: _purchaseScroll,
-                            onSelected: (index) => setState(() {
-                              _selectedLotIndex = index;
-                              _selectedSaleIndex = 0;
-                              _salesAreaActive = false;
-                            }),
+                            scrollController: _truckScroll,
+                            onSelected: (index) {
+                              setState(() {
+                                _selectedLotIndex = index;
+                                _selectedSaleIndex = 0;
+                              });
+                            },
+                            onOpen: _openTruckDetail,
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(
-                        flex: 4,
-                        child: Focus(
-                          focusNode: _salesFocus,
-                          child: _SalesTable(
-                            sales: _selectedLot.sales,
-                            selectedIndex: _selectedSaleIndex,
-                            active: _salesAreaActive,
-                            scrollController: _salesScroll,
-                            onSelected: (index) => setState(() {
-                              _selectedSaleIndex = index;
-                              _salesAreaActive = true;
-                            }),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
-                const _ShortcutBar(),
+                _ShortcutBar(showingTruckDetail: _showingTruckDetail),
               ],
             ),
           ),
@@ -328,184 +344,222 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   }
 }
 
-class _PurchaseTable extends StatelessWidget {
-  const _PurchaseTable({
+class _TruckListView extends StatelessWidget {
+  const _TruckListView({
+    super.key,
     required this.lots,
     required this.selectedIndex,
-    required this.active,
     required this.scrollController,
     required this.onSelected,
+    required this.onOpen,
   });
 
   final List<_PurchaseLot> lots;
   final int selectedIndex;
-  final bool active;
   final ScrollController scrollController;
   final ValueChanged<int> onSelected;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
     return _TableShell(
-      active: active,
-      child: _ScrollableTable(
+      active: true,
+      child: _RecordTable(
         scrollController: scrollController,
-        table: DataTable(
-          columnSpacing: 28,
-          headingRowColor: WidgetStateProperty.all(AppColors.emerald600),
-          headingTextStyle: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-          dataRowMinHeight: 38,
-          dataRowMaxHeight: 42,
-          columns: const [
-            DataColumn(label: Text('Sr. No.')),
-            DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Name of the Party')),
-            DataColumn(label: Text('Item')),
-            DataColumn(label: Text('Bags')),
-            DataColumn(label: Text('Sale')),
-            DataColumn(label: Text('Balance')),
-            DataColumn(label: Text('Caret')),
-          ],
-          rows: [
-            for (var i = 0; i < lots.length; i++)
-              DataRow(
-                selected: i == selectedIndex,
-                color: WidgetStateProperty.resolveWith((states) {
-                  if (i == selectedIndex) {
-                    return active
-                        ? AppColors.emerald600.withValues(alpha: 0.18)
-                        : AppColors.blue500.withValues(alpha: 0.10);
-                  }
-                  return i.isEven
-                      ? Colors.transparent
-                      : Colors.black.withValues(alpha: 0.03);
-                }),
-                cells: [
-                  DataCell(Text('${lots[i].srNo}'), onTap: () => onSelected(i)),
-                  DataCell(Text(_formatDate(lots[i].date)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(lots[i].partyName), onTap: () => onSelected(i)),
-                  DataCell(Text(lots[i].item), onTap: () => onSelected(i)),
-                  DataCell(Text(_number(lots[i].bags)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(_number(lots[i].soldBags)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(_number(lots[i].balanceBags)),
-                      onTap: () => onSelected(i)),
-                  DataCell(
-                    Text(
-                        '${_number(lots[i].soldCarets)} / ${_number(lots[i].totalCarets)}'),
-                    onTap: () => onSelected(i),
-                  ),
-                ],
-              ),
-          ],
-        ),
+        minWidth: 980,
+        header: const [
+          _CellSpec('Sr. No.', 86),
+          _CellSpec('Date', 126),
+          _CellSpec('Name of the Party', 280),
+          _CellSpec('Item', 180),
+          _CellSpec('Bags', 82),
+          _CellSpec('Sale', 82),
+          _CellSpec('Balance', 96),
+          _CellSpec('Caret', 96),
+        ],
+        rows: [
+          for (var i = 0; i < lots.length; i++)
+            _RecordRow(
+              selected: i == selectedIndex,
+              values: [
+                '${lots[i].srNo}',
+                _formatDate(lots[i].date),
+                lots[i].partyName,
+                lots[i].item,
+                _number(lots[i].bags),
+                _number(lots[i].soldBags),
+                _number(lots[i].balanceBags),
+                '${_number(lots[i].soldCarets)} / ${_number(lots[i].totalCarets)}',
+              ],
+              onTap: () => onSelected(i),
+              onDoubleTap: () {
+                onSelected(i);
+                onOpen();
+              },
+            ),
+        ],
       ),
     );
   }
 }
 
-class _SalesTable extends StatelessWidget {
-  const _SalesTable({
-    required this.sales,
-    required this.selectedIndex,
-    required this.active,
+class _TruckDetailView extends StatelessWidget {
+  const _TruckDetailView({
+    super.key,
+    required this.lot,
+    required this.selectedSaleIndex,
     required this.scrollController,
-    required this.onSelected,
+    required this.onSelectedSale,
   });
 
-  final List<_SaleLine> sales;
-  final int selectedIndex;
-  final bool active;
+  final _PurchaseLot lot;
+  final int selectedSaleIndex;
   final ScrollController scrollController;
-  final ValueChanged<int> onSelected;
+  final ValueChanged<int> onSelectedSale;
 
   @override
   Widget build(BuildContext context) {
-    if (sales.isEmpty) {
-      return _TableShell(
-        active: active,
-        child: const Center(
-          child: Text('No customer sales entered for this truck yet.'),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _TruckSummary(lot: lot),
+        const SizedBox(height: 12),
+        Expanded(
+          child: lot.sales.isEmpty
+              ? const _TableShell(
+                  active: true,
+                  child: Center(
+                    child:
+                        Text('No customer sales entered for this truck yet.'),
+                  ),
+                )
+              : _TableShell(
+                  active: true,
+                  child: _RecordTable(
+                    scrollController: scrollController,
+                    minWidth: 940,
+                    header: const [
+                      _CellSpec('Bill No', 86),
+                      _CellSpec('Bill Date', 126),
+                      _CellSpec('Party Name', 300),
+                      _CellSpec('Bags', 82),
+                      _CellSpec('Weight', 96),
+                      _CellSpec('Rate', 82),
+                      _CellSpec('Unit', 76),
+                      _CellSpec('Amount', 116),
+                    ],
+                    rows: [
+                      for (var i = 0; i < lot.sales.length; i++)
+                        _RecordRow(
+                          selected: i == selectedSaleIndex,
+                          values: [
+                            '${lot.sales[i].billNo}',
+                            _formatDate(lot.sales[i].date),
+                            lot.sales[i].partyName,
+                            _number(lot.sales[i].bags),
+                            _number(lot.sales[i].weight),
+                            _number(lot.sales[i].rate),
+                            lot.sales[i].unit,
+                            _money(lot.sales[i].amount),
+                          ],
+                          onTap: () => onSelectedSale(i),
+                        ),
+                    ],
+                  ),
+                ),
         ),
-      );
-    }
+      ],
+    );
+  }
+}
 
-    return _TableShell(
-      active: active,
-      child: _ScrollableTable(
-        scrollController: scrollController,
-        table: DataTable(
-          columnSpacing: 28,
-          headingRowColor: WidgetStateProperty.all(AppColors.emerald700),
-          headingTextStyle: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-          dataRowMinHeight: 38,
-          dataRowMaxHeight: 42,
-          columns: const [
-            DataColumn(label: Text('Bill No')),
-            DataColumn(label: Text('Bill Date')),
-            DataColumn(label: Text('Party Name')),
-            DataColumn(label: Text('Bags')),
-            DataColumn(label: Text('Weight')),
-            DataColumn(label: Text('Rate')),
-            DataColumn(label: Text('Unit')),
-            DataColumn(label: Text('Amount')),
-          ],
-          rows: [
-            for (var i = 0; i < sales.length; i++)
-              DataRow(
-                selected: i == selectedIndex,
-                color: WidgetStateProperty.resolveWith((states) {
-                  if (i == selectedIndex) {
-                    return active
-                        ? AppColors.emerald600.withValues(alpha: 0.18)
-                        : AppColors.blue500.withValues(alpha: 0.10);
-                  }
-                  return i.isEven
-                      ? Colors.transparent
-                      : Colors.black.withValues(alpha: 0.03);
-                }),
-                cells: [
-                  DataCell(Text('${sales[i].billNo}'),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(_formatDate(sales[i].date)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(sales[i].partyName),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(_number(sales[i].bags)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(_number(sales[i].weight)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(_number(sales[i].rate)),
-                      onTap: () => onSelected(i)),
-                  DataCell(Text(sales[i].unit), onTap: () => onSelected(i)),
-                  DataCell(Text(_money(sales[i].amount)),
-                      onTap: () => onSelected(i)),
-                ],
-              ),
-          ],
+class _TruckSummary extends StatelessWidget {
+  const _TruckSummary({required this.lot});
+
+  final _PurchaseLot lot;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
+      ),
+      child: Wrap(
+        spacing: 18,
+        runSpacing: 8,
+        children: [
+          _SummaryText(label: 'Truck', value: '${lot.srNo}'),
+          _SummaryText(label: 'Party', value: lot.partyName),
+          _SummaryText(label: 'Item', value: lot.item),
+          _SummaryText(label: 'Bags', value: _number(lot.bags)),
+          _SummaryText(label: 'Sold', value: _number(lot.soldBags)),
+          _SummaryText(label: 'Balance', value: _number(lot.balanceBags)),
+          _SummaryText(
+            label: 'Caret',
+            value: '${_number(lot.soldCarets)} / ${_number(lot.totalCarets)}',
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ScrollableTable extends StatelessWidget {
-  const _ScrollableTable({required this.scrollController, required this.table});
+class _SummaryText extends StatelessWidget {
+  const _SummaryText({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 130,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context)
+                .textTheme
+                .labelLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecordTable extends StatelessWidget {
+  const _RecordTable({
+    required this.scrollController,
+    required this.minWidth,
+    required this.header,
+    required this.rows,
+  });
 
   final ScrollController scrollController;
-  final DataTable table;
+  final double minWidth;
+  final List<_CellSpec> header;
+  final List<_RecordRow> rows;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final tableWidth =
+            constraints.maxWidth > minWidth ? constraints.maxWidth : minWidth;
         return Scrollbar(
           controller: scrollController,
           thumbVisibility: true,
@@ -513,9 +567,15 @@ class _ScrollableTable extends StatelessWidget {
             controller: scrollController,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                child: table,
+              child: SizedBox(
+                width: tableWidth,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _HeaderRow(cells: header),
+                    ...rows,
+                  ],
+                ),
               ),
             ),
           ),
@@ -523,6 +583,117 @@ class _ScrollableTable extends StatelessWidget {
       },
     );
   }
+}
+
+class _HeaderRow extends StatelessWidget {
+  const _HeaderRow({required this.cells});
+
+  final List<_CellSpec> cells;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44,
+      color: AppColors.emerald700,
+      child: Row(
+        children: [
+          for (final cell in cells)
+            Expanded(
+              flex: cell.flex,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    cell.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecordRow extends StatelessWidget {
+  const _RecordRow({
+    required this.selected,
+    required this.values,
+    required this.onTap,
+    this.onDoubleTap,
+  });
+
+  final bool selected;
+  final List<String> values;
+  final VoidCallback onTap;
+  final VoidCallback? onDoubleTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final specs = values.length == 8
+        ? const [86, 126, 280, 180, 82, 82, 96, 96]
+        : const [86, 126, 300, 82, 96, 82, 76, 116];
+
+    return InkWell(
+      onTap: onTap,
+      onDoubleTap: onDoubleTap,
+      child: Container(
+        height: 58,
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.emerald600.withValues(alpha: 0.18)
+              : isDark
+                  ? AppColors.darkSurface
+                  : AppColors.lightSurface,
+          border: Border(
+            bottom: BorderSide(
+              color:
+                  isDark ? AppColors.darkBorderSubtle : AppColors.lightBorder,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < values.length; i++)
+              Expanded(
+                flex: specs[i],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Align(
+                    alignment:
+                        i >= 4 ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Text(
+                      values[i],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight:
+                                selected ? FontWeight.w800 : FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CellSpec {
+  const _CellSpec(this.label, this.flex);
+
+  final String label;
+  final int flex;
 }
 
 class _TableShell extends StatelessWidget {
@@ -555,22 +726,28 @@ class _TableShell extends StatelessWidget {
 }
 
 class _ShortcutBar extends StatelessWidget {
-  const _ShortcutBar();
+  const _ShortcutBar({required this.showingTruckDetail});
+
+  final bool showingTruckDetail;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 36,
       alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: AppColors.emerald800,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Text(
-        'Enter Edit Truck    F5 Add Customer    F6 Add Truck    Down in Sales Adds Next Customer    Esc Back',
+      child: Text(
+        showingTruckDetail
+            ? 'Esc Truck List    F2 Edit Truck    F5 Add Customer    Down on Last Customer Adds Next'
+            : 'Arrow Keys Select Truck    Enter Open Truck    F2 Edit Truck    F6 Add Truck    Esc Back',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        style:
+            const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
       ),
     );
   }
