@@ -45,3 +45,16 @@ I've successfully converted the Nexon ERP into a Progressive Web App with offlin
 7. **Deploy**: Upload `build/web` to any static hosting (Netlify, Vercel, Firebase Hosting)
 
 The app now works **fully offline** - all data is stored locally in SQLite. When internet is available, it automatically syncs to Supabase, which then pushes changes to other devices in real-time.
+
+
+
+
+
+
+
+README.md has been updated successfully with the new format. The changes include:
+
+- **Demo Login** section now lists all three demo accounts with their specific usernames and passwords
+- Added note about authentication being client-side and prototype-only
+- Removed the garbage characters that were at the end of the file
+- Clean, consistent formatting throughout
