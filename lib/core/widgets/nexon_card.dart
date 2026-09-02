@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/theme_context.dart';
 
 /// Premium card with soft shadow and rounded corners.
 class NexonCard extends StatelessWidget {
@@ -21,9 +21,8 @@ class NexonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final border = borderColor ??
-        (isDark ? AppColors.darkBorder : AppColors.lightBorder);
+    final isDark = context.isDarkMode;
+    final border = borderColor ?? context.appBorder;
 
     return Material(
       color: Colors.transparent,
@@ -33,9 +32,7 @@ class NexonCard extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: gradient == null
-                ? (isDark ? AppColors.darkCard : AppColors.lightCard)
-                : null,
+            color: gradient == null ? context.appCard : null,
             gradient: gradient,
             border: Border.all(color: border.withValues(alpha: 0.6)),
             boxShadow: isDark

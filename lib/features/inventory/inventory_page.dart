@@ -5,8 +5,10 @@ import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/error_state.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
+import '../../core/widgets/search_field.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../models/product_model.dart';
 import '../../services/products_provider.dart';
@@ -24,6 +26,13 @@ class InventoryPage extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (state.errorMessage != null) {
+      return ErrorState(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(productsProvider.notifier).load(),
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.all(responsive.contentPadding),
       child: Column(
@@ -31,7 +40,8 @@ class InventoryPage extends ConsumerWidget {
         children: [
           PageHeader(
             title: 'Inventory',
-            subtitle: '${state.products.length} products · ${state.transactions.length} transactions',
+            subtitle:
+                '${state.products.length} products · ${state.transactions.length} transactions',
           ),
           const SizedBox(height: 20),
           _InventoryToolbar(state: state),
@@ -69,12 +79,8 @@ class _InventoryToolbar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        TextField(
-          decoration: const InputDecoration(
-            hintText: 'Search products...',
-            prefixIcon: Icon(Icons.search, size: 20),
-            isDense: true,
-          ),
+        SearchField(
+          hintText: 'Search products...',
           onChanged: (v) => ref.read(productsProvider.notifier).setSearch(v),
         ),
         const SizedBox(height: 12),
@@ -84,19 +90,25 @@ class _InventoryToolbar extends ConsumerWidget {
             children: [
               FilterChip(
                 label: const Text('All'),
-                selected: state.categoryFilter == null && state.filter == ProductFilter.all,
+                selected: state.categoryFilter == null &&
+                    state.filter == ProductFilter.all,
                 onSelected: (_) {
                   ref.read(productsProvider.notifier).setCategory(null);
-                  ref.read(productsProvider.notifier).setFilter(ProductFilter.all);
+                  ref
+                      .read(productsProvider.notifier)
+                      .setFilter(ProductFilter.all);
                 },
               ),
-              ...ProductFilter.values.where((f) => f != ProductFilter.all).map((f) {
+              ...ProductFilter.values
+                  .where((f) => f != ProductFilter.all)
+                  .map((f) {
                 return Padding(
                   padding: const EdgeInsets.only(left: 8),
                   child: FilterChip(
                     label: Text(_filterLabel(f)),
                     selected: state.filter == f,
-                    onSelected: (_) => ref.read(productsProvider.notifier).setFilter(f),
+                    onSelected: (_) =>
+                        ref.read(productsProvider.notifier).setFilter(f),
                   ),
                 );
               }),
@@ -273,12 +285,14 @@ class _TimelinePanel extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text('Stock History', style: Theme.of(context).textTheme.titleMedium),
+            child: Text('Stock History',
+                style: Theme.of(context).textTheme.titleMedium),
           ),
           const Divider(height: 1),
           Expanded(
             child: txns.isEmpty
-                ? const EmptyState(icon: Icons.history, title: 'No transactions yet')
+                ? const EmptyState(
+                    icon: Icons.history, title: 'No transactions yet')
                 : ListView.separated(
                     itemCount: txns.length,
                     separatorBuilder: (_, __) => const Divider(height: 1),

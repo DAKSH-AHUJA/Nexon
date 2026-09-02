@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/dialogs.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/messages.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/error_state.dart';
+import '../../core/widgets/info_item.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
+import '../../core/widgets/search_field.dart';
 import '../../core/widgets/status_chip.dart';
+import '../../core/widgets/transaction_row.dart';
 import '../../models/customer_model.dart';
 import '../../services/customers_provider.dart';
 import 'widgets/customer_form_dialog.dart';
@@ -22,6 +29,13 @@ class CustomersPage extends ConsumerWidget {
 
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.errorMessage != null) {
+      return ErrorState(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(customersProvider.notifier).load(),
+      );
     }
 
     return Padding(
@@ -73,27 +87,15 @@ class CustomersPage extends ConsumerWidget {
     WidgetRef ref,
     Customer customer,
   ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Customer'),
-        content: Text('Remove "${customer.name}" from your customer list?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Delete Customer',
+      message: 'Remove "${customer.name}" from your customer list?',
     );
-    if (confirmed == true) {
+    if (confirmed) {
       ref.read(customersProvider.notifier).deleteCustomer(customer.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${customer.name} deleted')),
-        );
+        context.showMessage('${customer.name} deleted');
       }
     }
   }
@@ -110,14 +112,9 @@ class _Toolbar extends ConsumerWidget {
     return Row(
       children: [
         Expanded(
-          child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search by name, phone, or city...',
-              prefixIcon: Icon(Icons.search, size: 20),
-              isDense: true,
-            ),
-            onChanged: (v) =>
-                ref.read(customersProvider.notifier).setSearch(v),
+          child: SearchField(
+            hintText: 'Search by name, phone, or city...',
+            onChanged: (v) => ref.read(customersProvider.notifier).setSearch(v),
           ),
         ),
         const SizedBox(width: 12),
@@ -170,21 +167,13 @@ class _MasterDetailLayout extends ConsumerWidget {
               );
             },
             onDelete: (c) async {
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Delete Customer'),
-                  content: Text('Remove "${c.name}"?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Delete'),
-                    ),
-                  ],
-                ),
+              final confirmed = await showConfirmDialog(
+                context,
+                title: 'Delete Customer',
+                message: 'Remove "${c.name}"?',
+                destructive: false,
               );
-              if (confirmed == true) {
+              if (confirmed) {
                 ref.read(customersProvider.notifier).deleteCustomer(c.id);
               }
             },
@@ -210,22 +199,16 @@ class _MasterDetailLayout extends ConsumerWidget {
                     );
                   },
                   onDelete: () async {
-                    final confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Delete Customer'),
-                        content: Text('Remove "${selected.name}"?'),
-                        actions: [
-                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                          ElevatedButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
+                    final confirmed = await showConfirmDialog(
+                      context,
+                      title: 'Delete Customer',
+                      message: 'Remove "${selected.name}"?',
+                      destructive: false,
                     );
-                    if (confirmed == true) {
-                      ref.read(customersProvider.notifier).deleteCustomer(selected.id);
+                    if (confirmed) {
+                      ref
+                          .read(customersProvider.notifier)
+                          .deleteCustomer(selected.id);
                     }
                   },
                 ),
@@ -282,13 +265,15 @@ class _CustomerList extends StatelessWidget {
                 _showMobileDetail(context, c, onEdit, onDelete);
               }
             },
-            title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+            title: Text(c.name,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
             subtitle: Text('${c.city} · ${c.phone}'),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (c.hasOutstanding)
-                  StatusChip.warning(Formatters.currencyCompact(c.outstandingBalance)),
+                  StatusChip.warning(
+                      Formatters.currencyCompact(c.outstandingBalance)),
                 const SizedBox(width: 8),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert, size: 18),
@@ -355,8 +340,7 @@ class _CustomerDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final muted = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final muted = context.mutedText;
 
     return NexonCard(
       child: Column(
@@ -379,7 +363,8 @@ class _CustomerDetail extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(customer.name, style: Theme.of(context).textTheme.titleLarge),
+                    Text(customer.name,
+                        style: Theme.of(context).textTheme.titleLarge),
                     Text(customer.city, style: TextStyle(color: muted)),
                   ],
                 ),
@@ -397,42 +382,39 @@ class _CustomerDetail extends StatelessWidget {
             spacing: 24,
             runSpacing: 12,
             children: [
-              _InfoItem(label: 'Phone', value: customer.phone),
-              _InfoItem(label: 'Email', value: customer.email.isEmpty ? '—' : customer.email),
-              _InfoItem(label: 'GST', value: customer.gst.isEmpty ? '—' : customer.gst),
-              _InfoItem(label: 'Address', value: customer.address),
-              _InfoItem(
+              InfoItem(label: 'Phone', value: customer.phone),
+              InfoItem(
+                label: 'Email',
+                value: customer.email.isEmpty ? '—' : customer.email,
+              ),
+              InfoItem(
+                label: 'GST',
+                value: customer.gst.isEmpty ? '—' : customer.gst,
+              ),
+              InfoItem(label: 'Address', value: customer.address),
+              InfoItem(
                 label: 'Outstanding',
                 value: Formatters.currency(customer.outstandingBalance),
                 highlight: customer.hasOutstanding,
               ),
-              _InfoItem(
+              InfoItem(
                 label: 'Total Purchases',
                 value: Formatters.currency(customer.totalPurchases),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          Text('Purchase History', style: Theme.of(context).textTheme.titleMedium),
+          Text('Purchase History',
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           if (customer.purchaseHistory.isEmpty)
             Text('No purchases yet', style: TextStyle(color: muted))
           else
-            ...customer.purchaseHistory.map((p) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Expanded(child: Text(p.invoiceNo)),
-                      Text(Formatters.date(p.date)),
-                      const SizedBox(width: 16),
-                      Text(Formatters.currency(p.amount)),
-                      const SizedBox(width: 12),
-                      StatusChip(
-                        label: p.status,
-                        color: p.status == 'paid' ? AppColors.success : AppColors.warning,
-                      ),
-                    ],
-                  ),
+            ...customer.purchaseHistory.map((p) => TransactionRow(
+                  reference: p.invoiceNo,
+                  date: p.date,
+                  amount: p.amount,
+                  status: p.status,
                 )),
           if (customer.ledger.isNotEmpty) ...[
             const SizedBox(height: 20),
@@ -444,49 +426,19 @@ class _CustomerDetail extends StatelessWidget {
                     children: [
                       Expanded(
                         flex: 2,
-                        child: Text(l.description, overflow: TextOverflow.ellipsis),
+                        child: Text(l.description,
+                            overflow: TextOverflow.ellipsis),
                       ),
                       Text(Formatters.date(l.date)),
                       const SizedBox(width: 12),
-                      if (l.debit > 0) Text('Dr ${Formatters.currency(l.debit)}'),
-                      if (l.credit > 0) Text('Cr ${Formatters.currency(l.credit)}'),
+                      if (l.debit > 0)
+                        Text('Dr ${Formatters.currency(l.debit)}'),
+                      if (l.credit > 0)
+                        Text('Cr ${Formatters.currency(l.credit)}'),
                     ],
                   ),
                 )),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoItem extends StatelessWidget {
-  const _InfoItem({
-    required this.label,
-    required this.value,
-    this.highlight = false,
-  });
-
-  final String label;
-  final String value;
-  final bool highlight;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 180,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: highlight ? AppColors.warning : null,
-                ),
-          ),
         ],
       ),
     );

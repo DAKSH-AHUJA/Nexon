@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/error_state.dart';
+import '../../core/widgets/info_item.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
+import '../../core/widgets/search_field.dart';
 import '../../core/widgets/status_chip.dart';
+import '../../core/widgets/transaction_row.dart';
 import '../../models/supplier_model.dart';
 import '../../services/suppliers_provider.dart';
 
@@ -23,6 +28,13 @@ class SuppliersPage extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (state.errorMessage != null) {
+      return ErrorState(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(suppliersProvider.notifier).load(),
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.all(responsive.contentPadding),
       child: Column(
@@ -33,12 +45,8 @@ class SuppliersPage extends ConsumerWidget {
             subtitle: '${state.suppliers.length} suppliers',
           ),
           const SizedBox(height: 20),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search suppliers...',
-              prefixIcon: Icon(Icons.search, size: 20),
-              isDense: true,
-            ),
+          SearchField(
+            hintText: 'Search suppliers...',
             onChanged: (v) => ref.read(suppliersProvider.notifier).setSearch(v),
           ),
           const SizedBox(height: 16),
@@ -85,7 +93,10 @@ class _SupplierList extends ConsumerWidget {
 
     if (suppliers.isEmpty) {
       return const NexonCard(
-        child: EmptyState(icon: Icons.local_shipping_outlined, title: 'No suppliers found'),
+        child: EmptyState(
+          icon: Icons.local_shipping_outlined,
+          title: 'No suppliers found',
+        ),
       );
     }
 
@@ -119,10 +130,15 @@ class _SupplierList extends ConsumerWidget {
                 );
               }
             },
-            title: Text(s.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+            title: Text(
+              s.name,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             subtitle: Text('${s.city} · ${s.phone}'),
             trailing: s.outstandingPayment > 0
-                ? StatusChip.warning(Formatters.currencyCompact(s.outstandingPayment))
+                ? StatusChip.warning(
+                    Formatters.currencyCompact(s.outstandingPayment),
+                  )
                 : StatusChip.success('Paid up'),
           );
         },
@@ -138,8 +154,7 @@ class _SupplierDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final muted = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final muted = context.mutedText;
 
     return NexonCard(
       child: Column(
@@ -153,64 +168,41 @@ class _SupplierDetail extends StatelessWidget {
             spacing: 24,
             runSpacing: 12,
             children: [
-              _Info(label: 'Phone', value: supplier.phone),
-              _Info(label: 'Email', value: supplier.email.isEmpty ? '—' : supplier.email),
-              _Info(label: 'GST', value: supplier.gst.isEmpty ? '—' : supplier.gst),
-              _Info(label: 'Address', value: supplier.address),
-              _Info(
+              InfoItem(label: 'Phone', value: supplier.phone),
+              InfoItem(
+                label: 'Email',
+                value: supplier.email.isEmpty ? '—' : supplier.email,
+              ),
+              InfoItem(
+                label: 'GST',
+                value: supplier.gst.isEmpty ? '—' : supplier.gst,
+              ),
+              InfoItem(label: 'Address', value: supplier.address),
+              InfoItem(
                 label: 'Outstanding',
                 value: Formatters.currency(supplier.outstandingPayment),
               ),
-              _Info(
+              InfoItem(
                 label: 'Total Purchases',
                 value: Formatters.currency(supplier.totalPurchases),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          Text('Purchase History', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Purchase History',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           if (supplier.purchaseHistory.isEmpty)
             Text('No purchase orders', style: TextStyle(color: muted))
           else
-            ...supplier.purchaseHistory.map((p) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Expanded(child: Text(p.poNo)),
-                      Text(Formatters.date(p.date)),
-                      const SizedBox(width: 16),
-                      Text(Formatters.currency(p.amount)),
-                      const SizedBox(width: 12),
-                      StatusChip(
-                        label: p.status,
-                        color: p.status == 'paid' ? AppColors.success : AppColors.warning,
-                      ),
-                    ],
-                  ),
+            ...supplier.purchaseHistory.map((p) => TransactionRow(
+                  reference: p.poNo,
+                  date: p.date,
+                  amount: p.amount,
+                  status: p.status,
                 )),
-        ],
-      ),
-    );
-  }
-}
-
-class _Info extends StatelessWidget {
-  const _Info({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 180,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-          const SizedBox(height: 2),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );

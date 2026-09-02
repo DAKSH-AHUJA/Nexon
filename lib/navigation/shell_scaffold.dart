@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_colors.dart';
+import '../core/theme/theme_context.dart';
 import '../core/utils/responsive.dart';
 import 'nav_destinations.dart';
 import 'widgets/app_sidebar.dart';
@@ -58,7 +59,7 @@ class _ShellScaffoldState extends ConsumerState<ShellScaffold> {
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
     final current = _currentDestination(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
 
     return CallbackShortcuts(
       bindings: {

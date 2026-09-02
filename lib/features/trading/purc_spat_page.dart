@@ -1,144 +1,81 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/page_header.dart';
+import '../../domain/calculators/trading_calculator.dart';
+import '../../domain/models/purchase_lot.dart';
+import '../../domain/models/rate_unit.dart';
+import '../../domain/models/sale_line.dart';
+import '../../domain/money.dart';
+import '../../services/purc_spat_provider.dart';
 
-class PurcSpatPage extends StatefulWidget {
+class PurcSpatPage extends ConsumerStatefulWidget {
   const PurcSpatPage({super.key});
 
   @override
-  State<PurcSpatPage> createState() => _PurcSpatPageState();
+  ConsumerState<PurcSpatPage> createState() => _PurcSpatPageState();
 }
 
-class _PurcSpatPageState extends State<PurcSpatPage> {
-  final _truckScroll = ScrollController();
-  final _saleScroll = ScrollController();
-  final _pageFocus = FocusNode(debugLabel: 'Purc/SPAT module');
-
-  final List<_PurchaseLot> _lots = [
-    _PurchaseLot(
-      srNo: 1075,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'MUNGNA FALLI',
-      bags: 10,
-      totalCarets: 10,
-      sales: [
-        _SaleLine(
-          billNo: 1,
-          date: DateTime(2026, 8, 6),
-          partyName: 'KOMAL BALLU GANJ GONDIA',
-          bags: 1,
-          weight: 46,
-          rate: 50,
-          unit: '1KG',
-        ),
-        _SaleLine(
-          billNo: 2,
-          date: DateTime(2026, 8, 6),
-          partyName: 'BABA SOHAN GONDIA',
-          bags: 3,
-          weight: 142,
-          rate: 50,
-          unit: '1KG',
-        ),
-        _SaleLine(
-          billNo: 3,
-          date: DateTime(2026, 8, 6),
-          partyName: 'SOHAN BAHE KATI 9421247',
-          bags: 5,
-          weight: 238,
-          rate: 45,
-          unit: '1KG',
-        ),
-        _SaleLine(
-          billNo: 4,
-          date: DateTime(2026, 8, 6),
-          partyName: 'LAKHAN RKS GANJ 8888450',
-          bags: 1,
-          weight: 48,
-          rate: 47,
-          unit: '1KG',
-        ),
-      ],
-    ),
-    _PurchaseLot(
-      srNo: 1076,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'PATTAGOBHI',
-      bags: 25,
-      totalCarets: 0,
-      sales: const [],
-    ),
-    _PurchaseLot(
-      srNo: 1077,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'KATWAL',
-      bags: 40,
-      totalCarets: 0,
-      sales: const [],
-    ),
-    _PurchaseLot(
-      srNo: 1078,
-      date: DateTime(2026, 8, 6),
-      partyName: 'ABDULLA SETH RAIPUR',
-      item: 'SHIMLA MIRCHI',
-      bags: 10,
-      totalCarets: 0,
-      sales: const [],
-    ),
-    _PurchaseLot(
-      srNo: 1079,
-      date: DateTime(2026, 8, 6),
-      partyName: 'VICKY NANDU ND',
-      item: 'FOOL GOBHI',
-      bags: 20,
-      totalCarets: 10,
-      sales: const [],
-    ),
-  ];
+class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
+  final _purchaseScroll = ScrollController();
+  final _salesScroll = ScrollController();
+  final _purchaseFocus = FocusNode(debugLabel: 'Purchase truck list');
+  final _salesFocus = FocusNode(debugLabel: 'Customer sale list');
 
   int _selectedLotIndex = 0;
   int _selectedSaleIndex = 0;
-  bool _showingTruckDetail = false;
-
-  _PurchaseLot get _selectedLot => _lots[_selectedLotIndex];
+  bool _salesAreaActive = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _pageFocus.requestFocus();
+      if (mounted) _purchaseFocus.requestFocus();
     });
   }
 
   @override
   void dispose() {
-    _truckScroll.dispose();
-    _saleScroll.dispose();
-    _pageFocus.dispose();
+    _purchaseScroll.dispose();
+    _salesScroll.dispose();
+    _purchaseFocus.dispose();
+    _salesFocus.dispose();
     super.dispose();
   }
 
+  List<PurchaseLot> get _lots => ref.read(purcSpatProvider);
+
+  PurchaseLot? get _selectedLot {
+    final lots = _lots;
+    if (lots.isEmpty) return null;
+    return lots[_selectedLotIndex.clamp(0, lots.length - 1)];
+  }
+
   void _move(int delta) {
-    if (_showingTruckDetail) {
-      final sales = _selectedLot.sales;
-      if (sales.isEmpty) return;
-      if (delta > 0 && _selectedSaleIndex == sales.length - 1) {
+    final lot = _selectedLot;
+    if (lot == null) return;
+
+    if (_salesAreaActive) {
+      final sales = lot.sales;
+      if (sales.isEmpty) {
+        if (delta > 0) _addSale();
+        return;
+      }
+      if (delta > 0 && _selectedSaleIndex >= sales.length - 1) {
         _addSale();
         return;
       }
       setState(() {
-        _selectedSaleIndex = (_selectedSaleIndex + delta).clamp(
-          0,
-          sales.length - 1,
-        );
+        _selectedSaleIndex =
+            (_selectedSaleIndex + delta).clamp(0, sales.length - 1);
       });
-      _scrollToSelected(_saleScroll, _selectedSaleIndex);
+      _scrollToSelected(_salesScroll, _selectedSaleIndex);
       return;
     }
 
@@ -147,16 +84,14 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
           (_selectedLotIndex + delta).clamp(0, _lots.length - 1);
       _selectedSaleIndex = 0;
     });
-    _scrollToSelected(_truckScroll, _selectedLotIndex);
+    _scrollToSelected(_purchaseScroll, _selectedLotIndex);
   }
 
   void _scrollToSelected(ScrollController controller, int index) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.hasClients) return;
-      final target = (index * 58.0).clamp(
-        0.0,
-        controller.position.maxScrollExtent,
-      );
+      final target =
+          (index * 42.0).clamp(0.0, controller.position.maxScrollExtent);
       controller.animateTo(
         target,
         duration: const Duration(milliseconds: 120),
@@ -165,92 +100,131 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
     });
   }
 
-  void _openTruckDetail() {
-    setState(() {
-      _showingTruckDetail = true;
-      _selectedSaleIndex = 0;
-    });
-    _pageFocus.requestFocus();
+  void _activateSalesArea() {
+    setState(() => _salesAreaActive = true);
+    _salesFocus.requestFocus();
   }
 
-  void _backToTruckList() {
-    setState(() => _showingTruckDetail = false);
-    _pageFocus.requestFocus();
+  void _activatePurchaseArea() {
+    setState(() => _salesAreaActive = false);
+    _purchaseFocus.requestFocus();
   }
 
   Future<void> _addPurchase() async {
-    final lot = await showDialog<_PurchaseLot>(
+    final notifier = ref.read(purcSpatProvider.notifier);
+    final lot = await showDialog<PurchaseLot>(
       context: context,
-      builder: (context) => _PurchaseDialog(nextSrNo: _nextSrNo),
+      builder: (context) => _PurchaseDialog(nextSrNo: notifier.nextSrNo),
     );
     if (lot == null) return;
+
+    notifier.addLot(lot);
     setState(() {
-      _lots.add(lot);
       _selectedLotIndex = _lots.length - 1;
       _selectedSaleIndex = 0;
-      _showingTruckDetail = false;
+      _salesAreaActive = false;
     });
-    _scrollToSelected(_truckScroll, _selectedLotIndex);
-    _pageFocus.requestFocus();
+    _purchaseFocus.requestFocus();
   }
 
   Future<void> _editSelectedPurchase() async {
-    final updatedLot = await showDialog<_PurchaseLot>(
+    final lot = _selectedLot;
+    if (lot == null) return;
+
+    final updated = await showDialog<PurchaseLot>(
       context: context,
-      builder: (context) => _PurchaseDialog(
-        nextSrNo: _selectedLot.srNo,
-        initialLot: _selectedLot,
-      ),
+      builder: (context) =>
+          _PurchaseDialog(nextSrNo: lot.srNo, initialLot: lot),
     );
-    if (updatedLot == null) return;
-    setState(() => _lots[_selectedLotIndex] = updatedLot);
-    _pageFocus.requestFocus();
+    if (updated == null) return;
+
+    ref.read(purcSpatProvider.notifier).replaceLot(updated);
+    _purchaseFocus.requestFocus();
   }
 
   Future<void> _addSale() async {
-    final sale = await showDialog<_SaleLine>(
+    final lot = _selectedLot;
+    if (lot == null) return;
+
+    if (lot.balanceBags <= Money.zero) {
+      _showMessage('Truck ${lot.srNo} is fully sold — no bags remaining.');
+      return;
+    }
+
+    final sale = await showDialog<SaleLine>(
       context: context,
-      builder: (context) =>
-          _SaleDialog(nextBillNo: _selectedLot.sales.length + 1),
+      builder: (context) => _SaleDialog(lot: lot),
     );
     if (sale == null) return;
+
+    final result = ref.read(purcSpatProvider.notifier).addSale(lot.id, sale);
+    if (!result.isValid) {
+      _showMessage(result.summary);
+      return;
+    }
+
     setState(() {
-      final lot = _selectedLot;
-      final updatedSales = [...lot.sales, sale];
-      _lots[_selectedLotIndex] = lot.copyWith(sales: updatedSales);
-      _selectedSaleIndex = updatedSales.length - 1;
-      _showingTruckDetail = true;
+      _selectedSaleIndex = (_selectedLot?.sales.length ?? 1) - 1;
+      _salesAreaActive = true;
     });
-    _scrollToSelected(_saleScroll, _selectedSaleIndex);
-    _pageFocus.requestFocus();
+    _salesFocus.requestFocus();
   }
 
-  int get _nextSrNo {
-    if (_lots.isEmpty) return 1;
-    return _lots.map((lot) => lot.srNo).reduce((a, b) => a > b ? a : b) + 1;
+  Future<void> _editSelectedSale() async {
+    final lot = _selectedLot;
+    if (lot == null || lot.sales.isEmpty) return;
+
+    final index = _selectedSaleIndex.clamp(0, lot.sales.length - 1);
+    final existing = lot.sales[index];
+    final sale = await showDialog<SaleLine>(
+      context: context,
+      builder: (context) => _SaleDialog(lot: lot, initialSale: existing),
+    );
+    if (sale == null) return;
+
+    final result =
+        ref.read(purcSpatProvider.notifier).replaceSale(lot.id, sale);
+    if (!result.isValid) _showMessage(result.summary);
+  }
+
+  void _onEnter() {
+    if (_salesAreaActive) {
+      _editSelectedSale();
+    } else {
+      _editSelectedPurchase();
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final lots = ref.watch(purcSpatProvider);
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
+    final selectedIndex =
+        lots.isEmpty ? 0 : _selectedLotIndex.clamp(0, lots.length - 1);
+    final selectedLot = lots.isEmpty ? null : lots[selectedIndex];
+    final totals = TradingCalculator.totalsFor(lots);
 
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.arrowDown): () => _move(1),
         const SingleActivator(LogicalKeyboardKey.arrowUp): () => _move(-1),
-        const SingleActivator(LogicalKeyboardKey.enter): _openTruckDetail,
-        const SingleActivator(LogicalKeyboardKey.numpadEnter): _openTruckDetail,
-        const SingleActivator(LogicalKeyboardKey.arrowRight): _openTruckDetail,
-        const SingleActivator(LogicalKeyboardKey.f2): _editSelectedPurchase,
+        const SingleActivator(LogicalKeyboardKey.arrowRight):
+            _activateSalesArea,
+        const SingleActivator(LogicalKeyboardKey.arrowLeft):
+            _activatePurchaseArea,
+        const SingleActivator(LogicalKeyboardKey.enter): _onEnter,
+        const SingleActivator(LogicalKeyboardKey.numpadEnter): _onEnter,
         const SingleActivator(LogicalKeyboardKey.f5): _addSale,
         const SingleActivator(LogicalKeyboardKey.f6): _addPurchase,
-        const SingleActivator(LogicalKeyboardKey.escape): () {
-          if (_showingTruckDetail) _backToTruckList();
-        },
       },
       child: Focus(
-        focusNode: _pageFocus,
         autofocus: true,
         child: Container(
           color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
@@ -260,81 +234,68 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 PageHeader(
-                  title: _showingTruckDetail
-                      ? 'Customer Sales From Truck ${_selectedLot.srNo}'
-                      : 'Purchase / Sale Entry Module',
-                  subtitle: _showingTruckDetail
-                      ? '${_selectedLot.partyName} - ${_selectedLot.item}'
-                      : 'Select a truck, then press Enter or click to enter customer sales',
-                  actions: _showingTruckDetail
-                      ? [
-                          OutlinedButton.icon(
-                            onPressed: _backToTruckList,
-                            icon:
-                                const Icon(Icons.arrow_back_rounded, size: 18),
-                            label: const Text('Truck List'),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: _editSelectedPurchase,
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: const Text('F2 Edit Truck'),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: _addSale,
-                            icon: const Icon(
-                              Icons.person_add_alt_1_outlined,
-                              size: 18,
-                            ),
-                            label: const Text('Add Customer'),
-                          ),
-                        ]
-                      : [
-                          OutlinedButton.icon(
-                            onPressed: _addPurchase,
-                            icon: const Icon(
-                              Icons.local_shipping_outlined,
-                              size: 18,
-                            ),
-                            label: const Text('Add Truck'),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: _editSelectedPurchase,
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: const Text('F2 Edit'),
-                          ),
-                        ],
+                  title: 'Purchase / Sale Entry Module',
+                  subtitle:
+                      'Truck-wise vegetable purchase and customer-wise sale details',
+                  actions: [
+                    OutlinedButton.icon(
+                      onPressed: _editSelectedPurchase,
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit Truck'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _addSale,
+                      icon:
+                          const Icon(Icons.person_add_alt_1_outlined, size: 18),
+                      label: const Text('Add Customer'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
+                _TotalsStrip(totals: totals),
+                const SizedBox(height: 12),
                 Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 160),
-                    child: _showingTruckDetail
-                        ? _TruckDetailView(
-                            key: ValueKey(_selectedLot.srNo),
-                            lot: _selectedLot,
-                            selectedSaleIndex: _selectedSaleIndex,
-                            scrollController: _saleScroll,
-                            onSelectedSale: (index) {
-                              setState(() => _selectedSaleIndex = index);
-                            },
-                          )
-                        : _TruckListView(
-                            key: const ValueKey('truck-list'),
-                            lots: _lots,
-                            selectedIndex: _selectedLotIndex,
-                            scrollController: _truckScroll,
-                            onSelected: (index) {
-                              setState(() {
-                                _selectedLotIndex = index;
-                                _selectedSaleIndex = 0;
-                              });
-                            },
-                            onOpen: _openTruckDetail,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Focus(
+                          focusNode: _purchaseFocus,
+                          child: _PurchaseTable(
+                            lots: lots,
+                            selectedIndex: selectedIndex,
+                            active: !_salesAreaActive,
+                            scrollController: _purchaseScroll,
+                            onSelected: (index) => setState(() {
+                              _selectedLotIndex = index;
+                              _selectedSaleIndex = 0;
+                              _salesAreaActive = false;
+                            }),
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        flex: 4,
+                        child: Focus(
+                          focusNode: _salesFocus,
+                          child: _SalesTable(
+                            sales: selectedLot?.sales ?? const [],
+                            selectedIndex: _selectedSaleIndex,
+                            active: _salesAreaActive,
+                            scrollController: _salesScroll,
+                            onSelected: (index) => setState(() {
+                              _selectedSaleIndex = index;
+                              _salesAreaActive = true;
+                            }),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
-                _ShortcutBar(showingTruckDetail: _showingTruckDetail),
+                const _ShortcutBar(),
               ],
             ),
           ),
@@ -344,343 +305,121 @@ class _PurcSpatPageState extends State<PurcSpatPage> {
   }
 }
 
-class _TruckListView extends StatelessWidget {
-  const _TruckListView({
-    super.key,
-    required this.lots,
-    required this.selectedIndex,
-    required this.scrollController,
-    required this.onSelected,
-    required this.onOpen,
-  });
+class _TotalsStrip extends StatelessWidget {
+  const _TotalsStrip({required this.totals});
 
-  final List<_PurchaseLot> lots;
-  final int selectedIndex;
-  final ScrollController scrollController;
-  final ValueChanged<int> onSelected;
-  final VoidCallback onOpen;
+  final LotTotals totals;
 
   @override
   Widget build(BuildContext context) {
-    return _TableShell(
-      active: true,
-      child: _RecordTable(
-        scrollController: scrollController,
-        minWidth: 980,
-        header: const [
-          _CellSpec('Sr. No.', 86),
-          _CellSpec('Date', 126),
-          _CellSpec('Name of the Party', 280),
-          _CellSpec('Item', 180),
-          _CellSpec('Bags', 82),
-          _CellSpec('Sale', 82),
-          _CellSpec('Balance', 96),
-          _CellSpec('Caret', 96),
-        ],
-        rows: [
-          for (var i = 0; i < lots.length; i++)
-            _RecordRow(
-              selected: i == selectedIndex,
-              values: [
-                '${lots[i].srNo}',
-                _formatDate(lots[i].date),
-                lots[i].partyName,
-                lots[i].item,
-                _number(lots[i].bags),
-                _number(lots[i].soldBags),
-                _number(lots[i].balanceBags),
-                '${_number(lots[i].soldCarets)} / ${_number(lots[i].totalCarets)}',
-              ],
-              onTap: () => onSelected(i),
-              onDoubleTap: () {
-                onSelected(i);
-                onOpen();
-              },
-            ),
-        ],
+    final entries = <(String, String)>[
+      ('Bags', Money.formatQuantity(totals.bags)),
+      ('Sold', Money.formatQuantity(totals.soldBags)),
+      ('Balance', Money.formatQuantity(totals.balanceBags)),
+      (
+        'Caret',
+        '${Money.formatQuantity(totals.soldCarets)} / '
+            '${Money.formatQuantity(totals.carets)}'
       ),
-    );
-  }
-}
+      ('Sale Amount', Money.formatCurrency(totals.saleAmount)),
+    ];
 
-class _TruckDetailView extends StatelessWidget {
-  const _TruckDetailView({
-    super.key,
-    required this.lot,
-    required this.selectedSaleIndex,
-    required this.scrollController,
-    required this.onSelectedSale,
-  });
-
-  final _PurchaseLot lot;
-  final int selectedSaleIndex;
-  final ScrollController scrollController;
-  final ValueChanged<int> onSelectedSale;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Wrap(
+      spacing: 10,
+      runSpacing: 8,
       children: [
-        _TruckSummary(lot: lot),
-        const SizedBox(height: 12),
-        Expanded(
-          child: lot.sales.isEmpty
-              ? const _TableShell(
-                  active: true,
-                  child: Center(
-                    child:
-                        Text('No customer sales entered for this truck yet.'),
-                  ),
-                )
-              : _TableShell(
-                  active: true,
-                  child: _RecordTable(
-                    scrollController: scrollController,
-                    minWidth: 940,
-                    header: const [
-                      _CellSpec('Bill No', 86),
-                      _CellSpec('Bill Date', 126),
-                      _CellSpec('Party Name', 300),
-                      _CellSpec('Bags', 82),
-                      _CellSpec('Weight', 96),
-                      _CellSpec('Rate', 82),
-                      _CellSpec('Unit', 76),
-                      _CellSpec('Amount', 116),
-                    ],
-                    rows: [
-                      for (var i = 0; i < lot.sales.length; i++)
-                        _RecordRow(
-                          selected: i == selectedSaleIndex,
-                          values: [
-                            '${lot.sales[i].billNo}',
-                            _formatDate(lot.sales[i].date),
-                            lot.sales[i].partyName,
-                            _number(lot.sales[i].bags),
-                            _number(lot.sales[i].weight),
-                            _number(lot.sales[i].rate),
-                            lot.sales[i].unit,
-                            _money(lot.sales[i].amount),
-                          ],
-                          onTap: () => onSelectedSale(i),
-                        ),
-                    ],
-                  ),
-                ),
-        ),
+        for (final (label, value) in entries)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.emerald600.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '$label: $value',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
       ],
     );
   }
 }
 
-class _TruckSummary extends StatelessWidget {
-  const _TruckSummary({required this.lot});
-
-  final _PurchaseLot lot;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-        ),
-      ),
-      child: Wrap(
-        spacing: 18,
-        runSpacing: 8,
-        children: [
-          _SummaryText(label: 'Truck', value: '${lot.srNo}'),
-          _SummaryText(label: 'Party', value: lot.partyName),
-          _SummaryText(label: 'Item', value: lot.item),
-          _SummaryText(label: 'Bags', value: _number(lot.bags)),
-          _SummaryText(label: 'Sold', value: _number(lot.soldBags)),
-          _SummaryText(label: 'Balance', value: _number(lot.balanceBags)),
-          _SummaryText(
-            label: 'Caret',
-            value: '${_number(lot.soldCarets)} / ${_number(lot.totalCarets)}',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryText extends StatelessWidget {
-  const _SummaryText({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 130,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
-                .textTheme
-                .labelLarge
-                ?.copyWith(fontWeight: FontWeight.w800),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RecordTable extends StatelessWidget {
-  const _RecordTable({
+class _PurchaseTable extends StatelessWidget {
+  const _PurchaseTable({
+    required this.lots,
+    required this.selectedIndex,
+    required this.active,
     required this.scrollController,
-    required this.minWidth,
-    required this.header,
-    required this.rows,
+    required this.onSelected,
   });
 
+  final List<PurchaseLot> lots;
+  final int selectedIndex;
+  final bool active;
   final ScrollController scrollController;
-  final double minWidth;
-  final List<_CellSpec> header;
-  final List<_RecordRow> rows;
+  final ValueChanged<int> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final tableWidth =
-            constraints.maxWidth > minWidth ? constraints.maxWidth : minWidth;
-        return Scrollbar(
-          controller: scrollController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: tableWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _HeaderRow(cells: header),
-                    ...rows,
-                  ],
-                ),
-              ),
-            ),
+    if (lots.isEmpty) {
+      return const _TableShell(
+        active: true,
+        child: Center(child: Text('No trucks entered yet. Press F6 to add.')),
+      );
+    }
+
+    return _TableShell(
+      active: active,
+      child: _ScrollableTable(
+        scrollController: scrollController,
+        table: DataTable(
+          columnSpacing: 28,
+          headingRowColor: WidgetStateProperty.all(AppColors.emerald600),
+          headingTextStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
           ),
-        );
-      },
-    );
-  }
-}
-
-class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({required this.cells});
-
-  final List<_CellSpec> cells;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      color: AppColors.emerald700,
-      child: Row(
-        children: [
-          for (final cell in cells)
-            Expanded(
-              flex: cell.flex,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    cell.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+          dataRowMinHeight: 38,
+          dataRowMaxHeight: 42,
+          columns: const [
+            DataColumn(label: Text('Sr. No.')),
+            DataColumn(label: Text('Date')),
+            DataColumn(label: Text('Name of the Party')),
+            DataColumn(label: Text('Item')),
+            DataColumn(label: Text('Bags')),
+            DataColumn(label: Text('Sale')),
+            DataColumn(label: Text('Balance')),
+            DataColumn(label: Text('Caret')),
+            DataColumn(label: Text('Sale Amount')),
+          ],
+          rows: [
+            for (var i = 0; i < lots.length; i++)
+              DataRow(
+                selected: i == selectedIndex,
+                color: WidgetStateProperty.resolveWith(
+                  (states) => _rowColor(i, selectedIndex, active),
                 ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RecordRow extends StatelessWidget {
-  const _RecordRow({
-    required this.selected,
-    required this.values,
-    required this.onTap,
-    this.onDoubleTap,
-  });
-
-  final bool selected;
-  final List<String> values;
-  final VoidCallback onTap;
-  final VoidCallback? onDoubleTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final specs = values.length == 8
-        ? const [86, 126, 280, 180, 82, 82, 96, 96]
-        : const [86, 126, 300, 82, 96, 82, 76, 116];
-
-    return InkWell(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      child: Container(
-        height: 58,
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.emerald600.withValues(alpha: 0.18)
-              : isDark
-                  ? AppColors.darkSurface
-                  : AppColors.lightSurface,
-          border: Border(
-            bottom: BorderSide(
-              color:
-                  isDark ? AppColors.darkBorderSubtle : AppColors.lightBorder,
-            ),
-          ),
-        ),
-        child: Row(
-          children: [
-            for (var i = 0; i < values.length; i++)
-              Expanded(
-                flex: specs[i],
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Align(
-                    alignment:
-                        i >= 4 ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Text(
-                      values[i],
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight:
-                                selected ? FontWeight.w800 : FontWeight.w600,
-                          ),
-                    ),
+                cells: [
+                  DataCell(Text('${lots[i].srNo}'), onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.numericDate(lots[i].date)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(lots[i].partyName), onTap: () => onSelected(i)),
+                  DataCell(Text(lots[i].item), onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(lots[i].bags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(lots[i].soldBags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(lots[i].balanceBags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(
+                    Text(
+                        '${Formatters.quantity(lots[i].soldCarets)} / ${Formatters.quantity(lots[i].totalCarets)}'),
+                    onTap: () => onSelected(i),
                   ),
-                ),
+                  DataCell(Text(Formatters.amount(lots[i].saleAmount)),
+                      onTap: () => onSelected(i)),
+                ],
               ),
           ],
         ),
@@ -689,11 +428,131 @@ class _RecordRow extends StatelessWidget {
   }
 }
 
-class _CellSpec {
-  const _CellSpec(this.label, this.flex);
+class _SalesTable extends StatelessWidget {
+  const _SalesTable({
+    required this.sales,
+    required this.selectedIndex,
+    required this.active,
+    required this.scrollController,
+    required this.onSelected,
+  });
 
-  final String label;
-  final int flex;
+  final List<SaleLine> sales;
+  final int selectedIndex;
+  final bool active;
+  final ScrollController scrollController;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (sales.isEmpty) {
+      return _TableShell(
+        active: active,
+        child: const Center(
+          child: Text('No customer sales entered for this truck yet.'),
+        ),
+      );
+    }
+
+    final selected = selectedIndex.clamp(0, sales.length - 1);
+
+    return _TableShell(
+      active: active,
+      child: _ScrollableTable(
+        scrollController: scrollController,
+        table: DataTable(
+          columnSpacing: 28,
+          headingRowColor: WidgetStateProperty.all(AppColors.emerald700),
+          headingTextStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+          dataRowMinHeight: 38,
+          dataRowMaxHeight: 42,
+          columns: const [
+            DataColumn(label: Text('Bill No')),
+            DataColumn(label: Text('Bill Date')),
+            DataColumn(label: Text('Party Name')),
+            DataColumn(label: Text('Bags')),
+            DataColumn(label: Text('Caret')),
+            DataColumn(label: Text('Weight')),
+            DataColumn(label: Text('Rate')),
+            DataColumn(label: Text('Unit')),
+            DataColumn(label: Text('Amount')),
+          ],
+          rows: [
+            for (var i = 0; i < sales.length; i++)
+              DataRow(
+                selected: i == selected,
+                color: WidgetStateProperty.resolveWith(
+                  (states) => _rowColor(i, selected, active),
+                ),
+                cells: [
+                  DataCell(Text('${sales[i].billNo}'),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.numericDate(sales[i].date)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(sales[i].partyName),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].bags)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].carets)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].weight)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.quantity(sales[i].rate)),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(sales[i].unit.label),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(Formatters.amount(sales[i].amount)),
+                      onTap: () => onSelected(i)),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Color _rowColor(int index, int selectedIndex, bool active) {
+  if (index == selectedIndex) {
+    return active
+        ? AppColors.emerald600.withValues(alpha: 0.18)
+        : AppColors.blue500.withValues(alpha: 0.10);
+  }
+  return index.isEven
+      ? Colors.transparent
+      : Colors.black.withValues(alpha: 0.03);
+}
+
+class _ScrollableTable extends StatelessWidget {
+  const _ScrollableTable({required this.scrollController, required this.table});
+
+  final ScrollController scrollController;
+  final DataTable table;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          controller: scrollController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: table,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _TableShell extends StatelessWidget {
@@ -704,7 +563,7 @@ class _TableShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
@@ -726,28 +585,23 @@ class _TableShell extends StatelessWidget {
 }
 
 class _ShortcutBar extends StatelessWidget {
-  const _ShortcutBar({required this.showingTruckDetail});
-
-  final bool showingTruckDetail;
+  const _ShortcutBar();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 36,
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: AppColors.emerald800,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        showingTruckDetail
-            ? 'Esc Truck List    F2 Edit Truck    F5 Add Customer    Down on Last Customer Adds Next'
-            : 'Arrow Keys Select Truck    Enter Open Truck    F2 Edit Truck    F6 Add Truck    Esc Back',
+      child: const Text(
+        'Enter Edit    F5 Add Customer    F6 Add Truck    Down in Sales Adds Next Customer    Esc Back',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style:
-            const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -757,7 +611,7 @@ class _PurchaseDialog extends StatefulWidget {
   const _PurchaseDialog({required this.nextSrNo, this.initialLot});
 
   final int nextSrNo;
-  final _PurchaseLot? initialLot;
+  final PurchaseLot? initialLot;
 
   @override
   State<_PurchaseDialog> createState() => _PurchaseDialogState();
@@ -769,6 +623,8 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
   late final TextEditingController _bags;
   late final TextEditingController _carets;
 
+  ValidationResult _validation = const ValidationResult.valid();
+
   bool get _isEditing => widget.initialLot != null;
 
   @override
@@ -777,9 +633,10 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
     final lot = widget.initialLot;
     _party = TextEditingController(text: lot?.partyName ?? '');
     _item = TextEditingController(text: lot?.item ?? '');
-    _bags = TextEditingController(text: lot == null ? '' : _number(lot.bags));
+    _bags = TextEditingController(
+        text: lot == null ? '' : Formatters.quantity(lot.bags));
     _carets = TextEditingController(
-      text: lot == null ? '0' : _number(lot.totalCarets),
+      text: lot == null ? '0' : Formatters.quantity(lot.totalCarets),
     );
   }
 
@@ -792,49 +649,98 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
     super.dispose();
   }
 
+  void _save() {
+    final bags = Money.parseOrZero(_bags.text);
+    final carets = Money.parseOrZero(_carets.text);
+    final result = TradingCalculator.validatePurchase(
+      partyName: _party.text,
+      item: _item.text,
+      bags: bags,
+      carets: carets,
+      existing: widget.initialLot,
+    );
+
+    if (!result.isValid) {
+      setState(() => _validation = result);
+      return;
+    }
+
+    final existing = widget.initialLot;
+    Navigator.pop(
+      context,
+      PurchaseLot(
+        id: existing?.id ?? 'lot-${DateTime.now().microsecondsSinceEpoch}',
+        srNo: widget.nextSrNo,
+        date: existing?.date ?? DateTime.now(),
+        partyName: _party.text.trim().toUpperCase(),
+        item: _item.text.trim().toUpperCase(),
+        bags: bags,
+        totalCarets: carets,
+        sales: existing?.sales ?? const [],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(_isEditing ? 'Edit Purchase Truck' : 'Add Purchase Truck'),
       content: SizedBox(
         width: 420,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _party,
-              decoration: const InputDecoration(labelText: 'Name of the Party'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _item,
-              decoration: const InputDecoration(labelText: 'Item'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _bags,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Bags'),
-                    textInputAction: TextInputAction.next,
-                  ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _party,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Name of the Party',
+                  errorText: _validation.messageFor('partyName'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _carets,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Caret'),
-                    textInputAction: TextInputAction.done,
-                  ),
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _item,
+                decoration: InputDecoration(
+                  labelText: 'Item',
+                  errorText: _validation.messageFor('item'),
                 ),
-              ],
-            ),
-          ],
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _bags,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Bags',
+                        errorText: _validation.messageFor('bags'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _carets,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Caret',
+                        errorText: _validation.messageFor('carets'),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _save(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -842,118 +748,234 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            final bags = double.tryParse(_bags.text.trim()) ?? 0;
-            if (_party.text.trim().isEmpty ||
-                _item.text.trim().isEmpty ||
-                bags <= 0) {
-              return;
-            }
-            Navigator.pop(
-              context,
-              _PurchaseLot(
-                srNo: widget.nextSrNo,
-                date: widget.initialLot?.date ?? DateTime.now(),
-                partyName: _party.text.trim().toUpperCase(),
-                item: _item.text.trim().toUpperCase(),
-                bags: bags,
-                totalCarets: double.tryParse(_carets.text.trim()) ?? 0,
-                sales: widget.initialLot?.sales ?? const [],
-              ),
-            );
-          },
-          child: const Text('Save'),
-        ),
+        ElevatedButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }
 }
 
 class _SaleDialog extends StatefulWidget {
-  const _SaleDialog({required this.nextBillNo});
+  const _SaleDialog({required this.lot, this.initialSale});
 
-  final int nextBillNo;
+  final PurchaseLot lot;
+  final SaleLine? initialSale;
 
   @override
   State<_SaleDialog> createState() => _SaleDialogState();
 }
 
 class _SaleDialogState extends State<_SaleDialog> {
-  final _party = TextEditingController();
-  final _bags = TextEditingController();
-  final _weight = TextEditingController();
-  final _rate = TextEditingController();
-  final _unit = TextEditingController(text: '1KG');
+  late final TextEditingController _party;
+  late final TextEditingController _bags;
+  late final TextEditingController _carets;
+  late final TextEditingController _weight;
+  late final TextEditingController _rate;
+  late RateUnit _unit;
+
+  ValidationResult _validation = const ValidationResult.valid();
+
+  @override
+  void initState() {
+    super.initState();
+    final sale = widget.initialSale;
+    _party = TextEditingController(text: sale?.partyName ?? '');
+    _bags = TextEditingController(
+      text: sale == null ? '' : Money.formatQuantity(sale.bags),
+    );
+    _carets = TextEditingController(
+      text: sale == null ? '0' : Money.formatQuantity(sale.carets),
+    );
+    _weight = TextEditingController(
+      text: sale == null ? '' : Money.formatQuantity(sale.weight),
+    );
+    _rate = TextEditingController(
+      text: sale == null ? '' : Money.formatQuantity(sale.rate),
+    );
+    _unit = sale?.unit ?? RateUnit.perKg;
+
+    for (final controller in [_bags, _carets, _weight, _rate]) {
+      controller.addListener(() => setState(() {}));
+    }
+  }
 
   @override
   void dispose() {
     _party.dispose();
     _bags.dispose();
+    _carets.dispose();
     _weight.dispose();
     _rate.dispose();
-    _unit.dispose();
     super.dispose();
+  }
+
+  Decimal get _liveAmount => _unit.amount(
+        weight: Money.parseOrZero(_weight.text),
+        bags: Money.parseOrZero(_bags.text),
+        carets: Money.parseOrZero(_carets.text),
+        rate: Money.parseOrZero(_rate.text),
+      );
+
+  void _save() {
+    final bags = Money.parseOrZero(_bags.text);
+    final carets = Money.parseOrZero(_carets.text);
+    final weight = Money.parseOrZero(_weight.text);
+    final rate = Money.parseOrZero(_rate.text);
+
+    final result = TradingCalculator.validateSale(
+      lot: widget.lot,
+      partyName: _party.text,
+      bags: bags,
+      carets: carets,
+      weight: weight,
+      rate: rate,
+      replacing: widget.initialSale,
+    );
+
+    if (!result.isValid) {
+      setState(() => _validation = result);
+      return;
+    }
+
+    final existing = widget.initialSale;
+    Navigator.pop(
+      context,
+      SaleLine(
+        id: existing?.id ?? 'sale-${DateTime.now().microsecondsSinceEpoch}',
+        billNo: existing?.billNo ?? widget.lot.nextBillNo,
+        date: existing?.date ?? DateTime.now(),
+        partyName: _party.text.trim().toUpperCase(),
+        bags: bags,
+        carets: carets,
+        weight: weight,
+        rate: rate,
+        unit: _unit,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final lot = widget.lot;
+    final availableBags =
+        lot.balanceBags + (widget.initialSale?.bags ?? Money.zero);
+
     return AlertDialog(
-      title: const Text('Add Customer Sale'),
+      title: Text(
+        widget.initialSale == null ? 'Add Customer Sale' : 'Edit Customer Sale',
+      ),
       content: SizedBox(
         width: 460,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _party,
-              decoration: const InputDecoration(labelText: 'Party Name'),
-              textInputAction: TextInputAction.next,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _bags,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Bags'),
-                    textInputAction: TextInputAction.next,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Truck ${lot.srNo} — ${lot.item} — '
+                '${Money.formatQuantity(availableBags)} bags available',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _party,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Party Name',
+                  errorText: _validation.messageFor('partyName'),
+                ),
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _bags,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Bags',
+                        errorText: _validation.messageFor('bags'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _carets,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Caret',
+                        errorText: _validation.messageFor('carets'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _weight,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Weight',
+                        errorText: _validation.messageFor('weight'),
+                      ),
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _rate,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Rate',
+                        errorText: _validation.messageFor('rate'),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _save(),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue:
+                          RateUnit.presets.any((u) => u.label == _unit.label)
+                              ? _unit.label
+                              : RateUnit.perKg.label,
+                      decoration: const InputDecoration(labelText: 'Unit'),
+                      items: [
+                        for (final unit in RateUnit.presets)
+                          DropdownMenuItem(
+                            value: unit.label,
+                            child: Text(unit.label),
+                          ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _unit = RateUnit.parse(value)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Amount: ${Money.formatCurrency(_liveAmount)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _weight,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Weight'),
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _rate,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Rate'),
-                    textInputAction: TextInputAction.next,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _unit,
-                    decoration: const InputDecoration(labelText: 'Unit'),
-                    textInputAction: TextInputAction.done,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -961,106 +983,8 @@ class _SaleDialogState extends State<_SaleDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: () {
-            final bags = double.tryParse(_bags.text.trim()) ?? 0;
-            final weight = double.tryParse(_weight.text.trim()) ?? 0;
-            final rate = double.tryParse(_rate.text.trim()) ?? 0;
-            if (_party.text.trim().isEmpty ||
-                bags <= 0 ||
-                weight <= 0 ||
-                rate <= 0) {
-              return;
-            }
-            Navigator.pop(
-              context,
-              _SaleLine(
-                billNo: widget.nextBillNo,
-                date: DateTime.now(),
-                partyName: _party.text.trim().toUpperCase(),
-                bags: bags,
-                weight: weight,
-                rate: rate,
-                unit: _unit.text.trim().isEmpty
-                    ? '1KG'
-                    : _unit.text.trim().toUpperCase(),
-              ),
-            );
-          },
-          child: const Text('Save'),
-        ),
+        ElevatedButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }
 }
-
-class _PurchaseLot {
-  const _PurchaseLot({
-    required this.srNo,
-    required this.date,
-    required this.partyName,
-    required this.item,
-    required this.bags,
-    required this.totalCarets,
-    required this.sales,
-  });
-
-  final int srNo;
-  final DateTime date;
-  final String partyName;
-  final String item;
-  final double bags;
-  final double totalCarets;
-  final List<_SaleLine> sales;
-
-  double get soldBags => sales.fold(0, (sum, sale) => sum + sale.bags);
-  double get balanceBags => bags - soldBags;
-  double get soldCarets => sales.fold(0, (sum, sale) => sum + sale.bags);
-
-  _PurchaseLot copyWith({List<_SaleLine>? sales}) {
-    return _PurchaseLot(
-      srNo: srNo,
-      date: date,
-      partyName: partyName,
-      item: item,
-      bags: bags,
-      totalCarets: totalCarets,
-      sales: sales ?? this.sales,
-    );
-  }
-}
-
-class _SaleLine {
-  const _SaleLine({
-    required this.billNo,
-    required this.date,
-    required this.partyName,
-    required this.bags,
-    required this.weight,
-    required this.rate,
-    required this.unit,
-  });
-
-  final int billNo;
-  final DateTime date;
-  final String partyName;
-  final double bags;
-  final double weight;
-  final double rate;
-  final String unit;
-
-  double get amount => weight * rate;
-}
-
-String _formatDate(DateTime date) {
-  final day = date.day.toString().padLeft(2, '0');
-  final month = date.month.toString().padLeft(2, '0');
-  return '$day/$month/${date.year}';
-}
-
-String _number(double value) {
-  if (value == value.roundToDouble()) return value.toInt().toString();
-  return value.toStringAsFixed(2);
-}
-
-String _money(double value) => value.toStringAsFixed(2);
