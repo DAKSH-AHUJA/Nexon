@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/animated_counter.dart';
+import '../../core/widgets/async_value_view.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/nexon_skeleton.dart';
 import '../../models/dashboard_model.dart';
@@ -26,18 +28,13 @@ class DashboardPage extends ConsumerWidget {
     final dashboardAsync = ref.watch(dashboardDataProvider);
     final responsive = Responsive(context);
 
-    return dashboardAsync.when(
-      loading: () => _DashboardContent(
-        padding: responsive.contentPadding,
-        child: const DashboardSkeleton(),
-      ),
-      error: (error, _) => _DashboardContent(
-        padding: responsive.contentPadding,
-        child: Center(child: Text('Failed to load dashboard: $error')),
-      ),
-      data: (data) => _DashboardContent(
-        padding: responsive.contentPadding,
-        child: _DashboardBody(data: data, responsive: responsive),
+    return _DashboardContent(
+      padding: responsive.contentPadding,
+      child: AsyncValueView(
+        value: dashboardAsync,
+        loading: const DashboardSkeleton(),
+        errorMessage: 'Failed to load dashboard',
+        data: (data) => _DashboardBody(data: data, responsive: responsive),
       ),
     );
   }
@@ -95,8 +92,8 @@ class _DashboardBody extends StatelessWidget {
                             ),
                             const SizedBox(width: 20),
                             Expanded(
-                              child:
-                                  RecentPaymentsList(payments: data.recentPayments),
+                              child: RecentPaymentsList(
+                                  payments: data.recentPayments),
                             ),
                           ],
                         ),
@@ -161,11 +158,10 @@ class _Header extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 "Here's what's happening with ${Formatters.date(now)}",
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
-                    ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: context.mutedText),
               ),
             ],
           ),
@@ -262,7 +258,8 @@ class _StatsGrid extends StatelessWidget {
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: responsive.value(mobile: 2.2, tablet: 2.0, desktop: 1.8),
+        childAspectRatio:
+            responsive.value(mobile: 2.2, tablet: 2.0, desktop: 1.8),
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -326,9 +323,8 @@ class _StatItem extends StatelessWidget {
                   child: Text(
                     trend!,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: trendDown
-                              ? AppColors.danger
-                              : AppColors.success,
+                          color:
+                              trendDown ? AppColors.danger : AppColors.success,
                           fontWeight: FontWeight.w600,
                         ),
                   ),

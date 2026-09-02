@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/theme_context.dart';
 
 /// Loading skeleton placeholder for async content.
 class NexonSkeleton extends StatelessWidget {
@@ -18,10 +19,9 @@ class NexonSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final base = isDark ? AppColors.darkCard : AppColors.lightBorder;
-    final highlight =
-        isDark ? AppColors.darkCardElevated : AppColors.lightBackground;
+    final base =
+        context.isDarkMode ? AppColors.darkCard : AppColors.lightBorder;
+    final highlight = context.appCardElevated;
 
     return Shimmer.fromColors(
       baseColor: base,

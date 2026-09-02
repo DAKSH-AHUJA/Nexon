@@ -19,8 +19,8 @@ class Responsive {
 
   /// Returns mobile, tablet, or desktop value based on screen width.
   T value<T>({required T mobile, T? tablet, required T desktop}) {
-    if (isDesktop) return tablet ?? desktop;
-    if (isTablet) return tablet ?? mobile;
+    if (isDesktop) return desktop;
+    if (isTablet) return tablet ?? desktop;
     return mobile;
   }
 

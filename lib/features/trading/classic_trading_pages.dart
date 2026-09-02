@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/page_header.dart';
 
@@ -174,7 +175,7 @@ class _TradingMenuPageState extends State<TradingMenuPage> {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
 
     return CallbackShortcuts(
       bindings: {
@@ -250,7 +251,7 @@ class _TradingMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final borderColor = selected
         ? AppColors.emerald500
         : isDark
@@ -353,7 +354,7 @@ class TradingSectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
 
     return Container(
       color: isDark ? AppColors.darkBackground : AppColors.lightBackground,

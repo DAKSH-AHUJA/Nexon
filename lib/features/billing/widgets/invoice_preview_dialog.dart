@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/messages.dart';
 import '../../../models/invoice_model.dart';
 
 class InvoicePreviewDialog extends StatelessWidget {
@@ -148,9 +149,7 @@ class InvoicePreviewDialog extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('PDF saved to Downloads')),
-                      );
+                      context.showMessage('PDF saved to Downloads');
                     },
                     child: const Text('Download PDF'),
                   ),

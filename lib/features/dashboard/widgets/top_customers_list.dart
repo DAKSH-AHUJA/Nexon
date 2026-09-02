@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/animated_counter.dart';
 import '../../../core/widgets/nexon_card.dart';
@@ -43,8 +44,6 @@ class _CustomerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -56,9 +55,7 @@ class _CustomerRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: rank <= 3
                   ? AppColors.emerald600.withValues(alpha: 0.15)
-                  : (isDark
-                      ? AppColors.darkCardElevated
-                      : AppColors.lightBackground),
+                  : context.appCardElevated,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

@@ -95,6 +95,13 @@ class StatusBadge extends StatelessWidget {
   factory StatusBadge.overdue() =>
       const StatusBadge(label: 'Overdue', color: AppColors.danger);
 
+  /// Badge for an invoice status string; anything unknown reads as pending.
+  factory StatusBadge.invoice(String status) => switch (status) {
+        'paid' => StatusBadge.paid(),
+        'overdue' => StatusBadge.overdue(),
+        _ => StatusBadge.pending(),
+      };
+
   @override
   Widget build(BuildContext context) {
     return Container(

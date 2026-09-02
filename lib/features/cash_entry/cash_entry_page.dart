@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/collection_utils.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/widgets/empty_state.dart';
+import '../../core/widgets/error_state.dart';
 import '../../core/widgets/nexon_card.dart';
 import '../../core/widgets/page_header.dart';
 import '../../models/customer_model.dart';
@@ -49,7 +51,7 @@ class _CashEntryPageState extends ConsumerState<CashEntryPage> {
         : (customersWithDues.isNotEmpty ? customersWithDues.first.id : null);
     final selectedCustomer = selectedId == null
         ? null
-        : customersWithDues.firstWhere((c) => c.id == selectedId);
+        : customersWithDues.firstWhereOrNull((c) => c.id == selectedId);
     final receipts = _cashReceipts(state.customers);
     final totalOutstanding = state.customers.fold<double>(
       0,
@@ -61,6 +63,13 @@ class _CashEntryPageState extends ConsumerState<CashEntryPage> {
 
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.errorMessage != null) {
+      return ErrorState(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(customersProvider.notifier).load(),
+      );
     }
 
     return Padding(

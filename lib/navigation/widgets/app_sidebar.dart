@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
 import '../../services/auth_service.dart';
 import '../nav_destinations.dart';
 
@@ -23,7 +24,7 @@ class AppSidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
     final company = ref.watch(authProvider).currentCompany;
 
@@ -162,7 +163,7 @@ class _NavItemState extends State<_NavItem> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = context.isDarkMode;
     final selected = widget.selected;
     final bgColor = selected
         ? AppColors.emerald600.withValues(alpha: 0.12)
