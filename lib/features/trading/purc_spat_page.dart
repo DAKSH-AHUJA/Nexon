@@ -895,23 +895,24 @@ class _SaleDialogState extends State<_SaleDialog> {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: _party,
-                focusNode: _partyFocus,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: 'Party Name',
-                  errorText: _validation.messageFor('partyName'),
-                ),
-                textInputAction: TextInputAction.next,
-                onKeyEvent: (node, event) {
+              KeyboardListener(
+                focusNode: FocusNode(),
+                onKeyEvent: (event) {
                   if (event is KeyDownEvent &&
                       event.logicalKey == LogicalKeyboardKey.arrowDown) {
                     _bagsFocus.requestFocus();
-                    return KeyEventResult.handled;
                   }
-                  return KeyEventResult.ignored;
                 },
+                child: TextField(
+                  controller: _party,
+                  focusNode: _partyFocus,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: 'Party Name',
+                    errorText: _validation.messageFor('partyName'),
+                  ),
+                  textInputAction: TextInputAction.next,
+                ),
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -936,77 +937,77 @@ class _SaleDialogState extends State<_SaleDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _bags,
-                      focusNode: _bagsFocus,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Bags',
-                        errorText: _validation.messageFor('bags'),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onKeyEvent: (node, event) {
+                    child: KeyboardListener(
+                      focusNode: FocusNode(),
+                      onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
                           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                             _caretsFocus.requestFocus();
-                            return KeyEventResult.handled;
                           } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                             _partyFocus.requestFocus();
-                            return KeyEventResult.handled;
                           }
                         }
-                        return KeyEventResult.ignored;
                       },
+                      child: TextField(
+                        controller: _bags,
+                        focusNode: _bagsFocus,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Bags',
+                          errorText: _validation.messageFor('bags'),
+                        ),
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
-                      controller: _carets,
-                      focusNode: _caretsFocus,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Caret',
-                        errorText: _validation.messageFor('carets'),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onKeyEvent: (node, event) {
+                    child: KeyboardListener(
+                      focusNode: FocusNode(),
+                      onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
                           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                             _weightFocus.requestFocus();
-                            return KeyEventResult.handled;
                           } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                             _bagsFocus.requestFocus();
-                            return KeyEventResult.handled;
                           }
                         }
-                        return KeyEventResult.ignored;
                       },
+                      child: TextField(
+                        controller: _carets,
+                        focusNode: _caretsFocus,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Caret',
+                          errorText: _validation.messageFor('carets'),
+                        ),
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
-                      controller: _weight,
-                      focusNode: _weightFocus,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Weight',
-                        errorText: _validation.messageFor('weight'),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      onKeyEvent: (node, event) {
+                    child: KeyboardListener(
+                      focusNode: FocusNode(),
+                      onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
                           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                             _rateFocus.requestFocus();
-                            return KeyEventResult.handled;
                           } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                             _caretsFocus.requestFocus();
-                            return KeyEventResult.handled;
                           }
                         }
-                        return KeyEventResult.ignored;
                       },
+                      child: TextField(
+                        controller: _weight,
+                        focusNode: _weightFocus,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Weight',
+                          errorText: _validation.messageFor('weight'),
+                        ),
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
                   ),
                 ],
@@ -1016,25 +1017,26 @@ class _SaleDialogState extends State<_SaleDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _rate,
-                      focusNode: _rateFocus,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Rate',
-                        errorText: _validation.messageFor('rate'),
-                      ),
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _save(),
-                      onKeyEvent: (node, event) {
+                    child: KeyboardListener(
+                      focusNode: FocusNode(),
+                      onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
                           if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                             _weightFocus.requestFocus();
-                            return KeyEventResult.handled;
                           }
                         }
-                        return KeyEventResult.ignored;
                       },
+                      child: TextField(
+                        controller: _rate,
+                        focusNode: _rateFocus,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Rate',
+                          errorText: _validation.messageFor('rate'),
+                        ),
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _save(),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
