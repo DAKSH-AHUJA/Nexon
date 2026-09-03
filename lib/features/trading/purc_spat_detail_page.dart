@@ -15,10 +15,8 @@ import '../../domain/models/sale_line.dart';
 import '../../domain/money.dart';
 import '../../services/purc_spat_provider.dart';
 
-/// Second page: Shows customer details for a selected truck.
 class PurcSpatDetailPage extends ConsumerStatefulWidget {
   const PurcSpatDetailPage({super.key, required this.lotId});
-
   final String lotId;
 
   @override
@@ -42,22 +40,17 @@ class _PurcSpatDetailPageState extends ConsumerState<PurcSpatDetailPage> {
   void _addSale() async {
     final lot = _lot;
     if (lot == null) return;
-
     if (lot.balanceBags <= Money.zero) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(content: Text('Truck ${lot.srNo} is fully sold.')),
-        );
+        ..showSnackBar(SnackBar(content: Text('Truck ${lot.srNo} is fully sold.')));
       return;
     }
-
     final sale = await showDialog<SaleLine>(
       context: context,
       builder: (context) => _SaleDialog(lot: lot),
     );
     if (sale == null) return;
-
     final result = ref.read(purcSpatProvider.notifier).addSale(lot.id, sale);
     if (!result.isValid) {
       ScaffoldMessenger.of(context)
@@ -87,21 +80,9 @@ class _PurcSpatDetailPageState extends ConsumerState<PurcSpatDetailPage> {
             padding: EdgeInsets.all(responsive.contentPadding),
             child: Row(
               children: [
-                IconButton(
-                  onPressed: () => context.pop(),
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                Expanded(
-                  child: Text(
-                    'Truck ${lot.srNo} — ${lot.item}',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: _addSale,
-                  icon: const Icon(Icons.person_add_alt_1_outlined, size: 18),
-                  label: const Text('Add Customer'),
-                ),
+                IconButton(onPressed: () => context.pop(), icon: const Icon(Icons.arrow_back_rounded)),
+                Expanded(child: Text('Truck ${lot.srNo} — ${lot.item}', style: Theme.of(context).textTheme.headlineMedium)),
+                ElevatedButton.icon(onPressed: _addSale, icon: const Icon(Icons.person_add_alt_1_outlined, size: 18), label: const Text('Add Customer')),
               ],
             ),
           ),
@@ -109,23 +90,29 @@ class _PurcSpatDetailPageState extends ConsumerState<PurcSpatDetailPage> {
           const SizedBox(height: 16),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: responsive.contentPadding),
-            child: Text(
-              'Customers (${lot.sales.length})',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
+            child: Text('Customers (${lot.sales.length})', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
           ),
           const SizedBox(height: 8),
           Expanded(
             child: lot.sales.isEmpty
-                ? Center(
-                    child: Text(
-                      'No customers added yet.',
+                ? Center(child: Text('No customers added yet.', style: Theme.of(context).textTheme.bodyLarge))
+                : ListView.builder(
+                    controller: _salesScroll,
+                    padding: EdgeInsets.symmetric(horizontal: responsive.contentPadding),
+                    itemCount: lot.sales.length,
+                    itemBuilder: (context, index) {
+                      final sale = lot.sales[index];
+                      return _CustomerCard(sale: sale, isDark: isDark);
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 
 class _TruckDetailsCard extends StatelessWidget {
   const _TruckDetailsCard({required this.lot, required this.isDark});
-
   final PurchaseLot lot;
   final bool isDark;
 
@@ -137,28 +124,16 @@ class _TruckDetailsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-        ),
+        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
       ),
       child: Row(
         children: [
           _DetailItem(label: 'Party', value: lot.partyName, isDark: isDark),
-          _DetailItem(
-              label: 'Bags', value: Money.formatQuantity(lot.bags), isDark: isDark),
+          _DetailItem(label: 'Bags', value: Money.formatQuantity(lot.bags), isDark: isDark),
           if (lot.totalCarets > Money.zero)
-            _DetailItem(
-                label: 'Carets',
-                value: Money.formatQuantity(lot.totalCarets),
-                isDark: isDark),
-          _DetailItem(
-              label: 'Sold',
-              value: Money.formatQuantity(lot.soldBags),
-              isDark: isDark),
-          _DetailItem(
-              label: 'Balance',
-              value: Money.formatQuantity(lot.balanceBags),
-              isDark: isDark),
+            _DetailItem(label: 'Carets', value: Money.formatQuantity(lot.totalCarets), isDark: isDark),
+          _DetailItem(label: 'Sold', value: Money.formatQuantity(lot.soldBags), isDark: isDark),
+          _DetailItem(label: 'Balance', value: Money.formatQuantity(lot.balanceBags), isDark: isDark),
         ],
       ),
     );
@@ -166,12 +141,7 @@ class _TruckDetailsCard extends StatelessWidget {
 }
 
 class _DetailItem extends StatelessWidget {
-  const _DetailItem({
-    required this.label,
-    required this.value,
-    required this.isDark,
-  });
-
+  const _DetailItem({required this.label, required this.value, required this.isDark});
   final String label;
   final String value;
   final bool isDark;
@@ -182,21 +152,9 @@ class _DetailItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight,
-                ),
-          ),
+          Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
+          Text(value, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         ],
       ),
     );
@@ -205,7 +163,6 @@ class _DetailItem extends StatelessWidget {
 
 class _CustomerCard extends StatelessWidget {
   const _CustomerCard({required this.sale, required this.isDark});
-
   final SaleLine sale;
   final bool isDark;
 
@@ -220,27 +177,14 @@ class _CustomerCard extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.blue500.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  '${sale.billNo}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.blue500,
-                      ),
-                ),
-              ),
+              decoration: BoxDecoration(color: AppColors.blue500.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
+              child: Center(child: Text('${sale.billNo}', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, color: AppColors.blue500))),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
 
 class _SaleDialog extends StatefulWidget {
   const _SaleDialog({required this.lot, this.initialSale});
-
   final PurchaseLot lot;
   final SaleLine? initialSale;
 
@@ -270,21 +214,12 @@ class _SaleDialogState extends State<_SaleDialog> {
     super.initState();
     final sale = widget.initialSale;
     _party = TextEditingController(text: sale?.partyName ?? '');
-    _bags = TextEditingController(
-      text: sale == null ? '' : Money.formatQuantity(sale.bags),
-    );
-    _carets = TextEditingController(
-      text: sale == null ? '0' : Money.formatQuantity(sale.carets),
-    );
-    _weight = TextEditingController(
-      text: sale == null ? '' : Money.formatQuantity(sale.weight),
-    );
-    _rate = TextEditingController(
-      text: sale == null ? '' : Money.formatQuantity(sale.rate),
-    );
+    _bags = TextEditingController(text: sale == null ? '' : Money.formatQuantity(sale.bags));
+    _carets = TextEditingController(text: sale == null ? '0' : Money.formatQuantity(sale.carets));
+    _weight = TextEditingController(text: sale == null ? '' : Money.formatQuantity(sale.weight));
+    _rate = TextEditingController(text: sale == null ? '' : Money.formatQuantity(sale.rate));
     _unit = sale?.unit ?? RateUnit.perKg;
     _selectedMark = sale?.mark;
-
     for (final controller in [_bags, _carets, _weight, _rate]) {
       controller.addListener(() => setState(() {}));
     }
@@ -323,14 +258,10 @@ class _SaleDialogState extends State<_SaleDialog> {
     final carets = _parsedCarets;
     final weight = _parsedWeight;
     final rate = _parsedRate;
-
     if (bags == null || weight == null || rate == null) {
-      setState(() {
-        _validation = const ValidationResult(['Please enter valid numbers']);
-      });
+      setState(() { _validation = const ValidationResult(['Please enter valid numbers']); });
       return;
     }
-
     final result = TradingCalculator.validateSale(
       lot: widget.lot,
       partyName: _party.text.trim(),
@@ -339,19 +270,22 @@ class _SaleDialogState extends State<_SaleDialog> {
       weight: weight,
       rate: rate,
     );
-
     if (!result.isValid) {
       setState(() => _validation = result);
       return;
     }
-
     final existing = widget.initialSale;
     Navigator.pop(
+      context,
+      SaleLine(
+        id: existing?.id ?? 'sale-${DateTime.now().microsecondsSinceEpoch}',
+        billNo: existing?.billNo ?? widget.lot.nextBillNo,
+        date: existing?.date ?? DateTime.now(),
+        partyName: _party.text.trim().toUpperCase(),
 
   @override
   Widget build(BuildContext context) {
     final availableBags = widget.lot.balanceBags;
-
     return AlertDialog(
       title: Text('Add Customer — Truck ${widget.lot.srNo}'),
       content: SizedBox(
@@ -361,16 +295,12 @@ class _SaleDialogState extends State<_SaleDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Available: ${Money.formatQuantity(availableBags)} bags',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
+              Text('Available: ${Money.formatQuantity(availableBags)} bags', style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
               KeyboardListener(
                 focusNode: FocusNode(),
                 onKeyEvent: (event) {
-                  if (event is KeyDownEvent &&
-                      event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                  if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.arrowDown) {
                     _bagsFocus.requestFocus();
                   }
                 },
@@ -378,10 +308,7 @@ class _SaleDialogState extends State<_SaleDialog> {
                   controller: _party,
                   focusNode: _partyFocus,
                   autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: 'Party Name',
-                    errorText: _validation.messageFor('partyName'),
-                  ),
+                  decoration: InputDecoration(labelText: 'Party Name', errorText: _validation.messageFor('partyName')),
                   textInputAction: TextInputAction.next,
                 ),
               ),
@@ -391,8 +318,7 @@ class _SaleDialogState extends State<_SaleDialog> {
                 decoration: const InputDecoration(labelText: 'Mark'),
                 items: [
                   const DropdownMenuItem(value: null, child: Text('-')),
-                  for (final mark in ['SVC', 'ARC', 'OTHER'])
-                    DropdownMenuItem(value: mark, child: Text(mark)),
+                  for (final mark in ['SVC', 'ARC', 'OTHER']) DropdownMenuItem(value: mark, child: Text(mark)),
                 ],
                 onChanged: (value) => setState(() => _selectedMark = value),
               ),
@@ -404,21 +330,15 @@ class _SaleDialogState extends State<_SaleDialog> {
                       focusNode: FocusNode(),
                       onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
-                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                            _caretsFocus.requestFocus();
-                          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                            _partyFocus.requestFocus();
-                          }
+                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) { _caretsFocus.requestFocus(); }
+                          else if (event.logicalKey == LogicalKeyboardKey.arrowUp) { _partyFocus.requestFocus(); }
                         }
                       },
                       child: TextField(
                         controller: _bags,
                         focusNode: _bagsFocus,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Bags',
-                          errorText: _validation.messageFor('bags'),
-                        ),
+                        decoration: InputDecoration(labelText: 'Bags', errorText: _validation.messageFor('bags')),
                         textInputAction: TextInputAction.next,
                       ),
                     ),
@@ -429,19 +349,29 @@ class _SaleDialogState extends State<_SaleDialog> {
                       focusNode: FocusNode(),
                       onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
-                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                            _weightFocus.requestFocus();
-                          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                            _bagsFocus.requestFocus();
-                          }
+                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) { _weightFocus.requestFocus(); }
+                          else if (event.logicalKey == LogicalKeyboardKey.arrowUp) { _bagsFocus.requestFocus(); }
                         }
                       },
                       child: TextField(
                         controller: _carets,
                         focusNode: _caretsFocus,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Caret',
+                        decoration: InputDecoration(labelText: 'Caret', errorText: _validation.messageFor('carets')),
+                        textInputAction: TextInputAction.next,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+        bags: bags,
+        carets: carets ?? Money.zero,
+        weight: weight,
+        rate: rate,
+        unit: _unit,
+        mark: _selectedMark,
+      ),
+    );
 
               const SizedBox(height: 12),
               Row(
@@ -451,21 +381,15 @@ class _SaleDialogState extends State<_SaleDialog> {
                       focusNode: FocusNode(),
                       onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
-                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                            _rateFocus.requestFocus();
-                          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                            _caretsFocus.requestFocus();
-                          }
+                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) { _rateFocus.requestFocus(); }
+                          else if (event.logicalKey == LogicalKeyboardKey.arrowUp) { _caretsFocus.requestFocus(); }
                         }
                       },
                       child: TextField(
                         controller: _weight,
                         focusNode: _weightFocus,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Weight',
-                          errorText: _validation.messageFor('weight'),
-                        ),
+                        decoration: InputDecoration(labelText: 'Weight', errorText: _validation.messageFor('weight')),
                         textInputAction: TextInputAction.next,
                       ),
                     ),
@@ -476,19 +400,14 @@ class _SaleDialogState extends State<_SaleDialog> {
                       focusNode: FocusNode(),
                       onKeyEvent: (event) {
                         if (event is KeyDownEvent) {
-                          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                            _weightFocus.requestFocus();
-                          }
+                          if (event.logicalKey == LogicalKeyboardKey.arrowUp) { _weightFocus.requestFocus(); }
                         }
                       },
                       child: TextField(
                         controller: _rate,
                         focusNode: _rateFocus,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Rate',
-                          errorText: _validation.messageFor('rate'),
-                        ),
+                        decoration: InputDecoration(labelText: 'Rate', errorText: _validation.messageFor('rate')),
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _save(),
                       ),
@@ -498,81 +417,35 @@ class _SaleDialogState extends State<_SaleDialog> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue:
-                    RateUnit.presets.any((u) => u.label == _unit.label)
-                        ? _unit.label
-                        : RateUnit.perKg.label,
+                initialValue: RateUnit.presets.any((u) => u.label == _unit.label) ? _unit.label : RateUnit.perKg.label,
                 decoration: const InputDecoration(labelText: 'Unit'),
-                items: [
-                  for (final unit in RateUnit.presets)
-                    DropdownMenuItem(value: unit.label, child: Text(unit.label)),
-                ],
+                items: [for (final unit in RateUnit.presets) DropdownMenuItem(value: unit.label, child: Text(unit.label))],
                 onChanged: (value) => setState(() => _unit = RateUnit.parse(value)),
               ),
               const SizedBox(height: 14),
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  'Amount: ${Money.formatCurrency(_liveAmount)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
+                child: Text('Amount: ${Money.formatCurrency(_liveAmount)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
               ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
         ElevatedButton(onPressed: _save, child: const Text('Save')),
       ],
     );
   }
 }
-                          errorText: _validation.messageFor('carets'),
-                        ),
-                        textInputAction: TextInputAction.next,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-      context,
-      SaleLine(
-        id: existing?.id ?? 'sale-${DateTime.now().microsecondsSinceEpoch}',
-        billNo: existing?.billNo ?? widget.lot.nextBillNo,
-        date: existing?.date ?? DateTime.now(),
-        partyName: _party.text.trim().toUpperCase(),
-        bags: bags,
-        carets: carets ?? Money.zero,
-        weight: weight,
-        rate: rate,
-        unit: _unit,
-        mark: _selectedMark,
-      ),
-    );
   }
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    sale.partyName,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
+                  Text(sale.partyName, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
                   if (sale.mark != null) ...[
                     const SizedBox(height: 2),
-                    Text(
-                      'Mark: ${sale.mark}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.emerald500,
-                          ),
-                    ),
+                    Text('Mark: ${sale.mark}', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.emerald500)),
                   ],
                 ],
               ),
@@ -580,21 +453,10 @@ class _SaleDialogState extends State<_SaleDialog> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '${Money.formatQuantity(sale.bags)} bags',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text('${Money.formatQuantity(sale.bags)} bags', style: Theme.of(context).textTheme.bodySmall),
                 if (sale.carets > Money.zero)
-                  Text(
-                    '${Money.formatQuantity(sale.carets)} carets',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                Text(
-                  Money.formatCurrency(sale.amount),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
+                  Text('${Money.formatQuantity(sale.carets)} carets', style: Theme.of(context).textTheme.bodySmall),
+                Text(Money.formatCurrency(sale.amount), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
               ],
             ),
           ],
@@ -603,23 +465,4 @@ class _SaleDialogState extends State<_SaleDialog> {
     );
   }
 }
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  )
-                : ListView.builder(
-                    controller: _salesScroll,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: responsive.contentPadding,
-                    ),
-                    itemCount: lot.sales.length,
-                    itemBuilder: (context, index) {
-                      final sale = lot.sales[index];
-                      return _CustomerCard(sale: sale, isDark: isDark);
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+} 
