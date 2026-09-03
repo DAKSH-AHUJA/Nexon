@@ -18,6 +18,7 @@ class SaleLine {
     required this.rate,
     required this.unit,
     Decimal? carets,
+    this.mark,
   }) : carets = carets ?? Money.zero;
 
   final String id;
@@ -33,6 +34,9 @@ class SaleLine {
   final Decimal weight;
   final Decimal rate;
   final RateUnit unit;
+
+  /// Mark/identifier for this sale (e.g., "SVC", "ARC") to identify batches.
+  final String? mark;
 
   /// Line amount. Always derived — never stored independently — so the UI,
   /// the truck totals and the reports cannot disagree.
@@ -52,6 +56,7 @@ class SaleLine {
     Decimal? weight,
     Decimal? rate,
     RateUnit? unit,
+    String? mark,
   }) {
     return SaleLine(
       id: id,
@@ -63,6 +68,7 @@ class SaleLine {
       weight: weight ?? this.weight,
       rate: rate ?? this.rate,
       unit: unit ?? this.unit,
+      mark: mark ?? this.mark,
     );
   }
 }

@@ -34,3 +34,18 @@ supplier brigns maal in carret and entry should be in caret
 
 tamatar aaya khali caret mei aaya item - tamatar caret
 
+
+
+
+```bash
+cd "c:\ALL STUDY RELATED DOCS\PROJECTS\nexon-ERP"
+git pull origin main
+```
+
+__Before switching to cloud AI tools:__
+
+```bash
+git add .
+git commit -m "Your changes here"
+git push origin main
+```

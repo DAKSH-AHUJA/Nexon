@@ -295,6 +295,8 @@ class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
                   ),
                 ),
                 const SizedBox(height: 10),
+                _CaretBalanceSummary(lot: selectedLot),
+                const SizedBox(height: 10),
                 const _ShortcutBar(),
               ],
             ),
@@ -473,6 +475,7 @@ class _SalesTable extends StatelessWidget {
             DataColumn(label: Text('Bill No')),
             DataColumn(label: Text('Bill Date')),
             DataColumn(label: Text('Party Name')),
+            DataColumn(label: Text('Mark')),
             DataColumn(label: Text('Bags')),
             DataColumn(label: Text('Caret')),
             DataColumn(label: Text('Weight')),
@@ -493,6 +496,8 @@ class _SalesTable extends StatelessWidget {
                   DataCell(Text(Formatters.numericDate(sales[i].date)),
                       onTap: () => onSelected(i)),
                   DataCell(Text(sales[i].partyName),
+                      onTap: () => onSelected(i)),
+                  DataCell(Text(sales[i].mark ?? '-'),
                       onTap: () => onSelected(i)),
                   DataCell(Text(Formatters.quantity(sales[i].bags.toDouble())),
                       onTap: () => onSelected(i)),
@@ -772,6 +777,9 @@ class _SaleDialogState extends State<_SaleDialog> {
   late final TextEditingController _weight;
   late final TextEditingController _rate;
   late RateUnit _unit;
+  String? _selectedMark;
+
+  static const List<String> _markOptions = ['SVC', 'ARC', 'OTHER'];
 
   ValidationResult _validation = const ValidationResult.valid();
 
@@ -793,6 +801,7 @@ class _SaleDialogState extends State<_SaleDialog> {
       text: sale == null ? '' : Money.formatQuantity(sale.rate),
     );
     _unit = sale?.unit ?? RateUnit.perKg;
+    _selectedMark = sale?.mark;
 
     for (final controller in [_bags, _carets, _weight, _rate]) {
       controller.addListener(() => setState(() {}));
@@ -850,6 +859,7 @@ class _SaleDialogState extends State<_SaleDialog> {
         weight: weight,
         rate: rate,
         unit: _unit,
+        mark: _selectedMark,
       ),
     );
   }
@@ -885,6 +895,24 @@ class _SaleDialogState extends State<_SaleDialog> {
                   errorText: _validation.messageFor('partyName'),
                 ),
                 textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedMark,
+                decoration: const InputDecoration(labelText: 'Mark'),
+                items: [
+                  const DropdownMenuItem(
+                    value: null,
+                    child: Text('-'),
+                  ),
+                  for (final mark in _markOptions)
+                    DropdownMenuItem(
+                      value: mark,
+                      child: Text(mark),
+                    ),
+                ],
+                onChanged: (value) =>
+                    setState(() => _selectedMark = value),
               ),
               const SizedBox(height: 12),
               Row(
@@ -986,6 +1014,79 @@ class _SaleDialogState extends State<_SaleDialog> {
         ),
         ElevatedButton(onPressed: _save, child: const Text('Save')),
       ],
+    );
+  }
+}
+
+/// Shows caret balance per customer for the selected lot.
+class _CaretBalanceSummary extends StatelessWidget {
+  const _CaretBalanceSummary({this.lot});
+
+  final PurchaseLot? lot;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lot = this.lot;
+
+    if (lot == null || lot.sales.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final caretBalances = lot.caretBalanceByCustomer;
+    if (caretBalances.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Caret Balance — Who owes carets back',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              for (final entry in caretBalances.entries)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: entry.value > Money.zero
+                        ? AppColors.orange500.withValues(alpha: 0.15)
+                        : AppColors.emerald600.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '${entry.key}: ${Money.formatQuantity(entry.value)} carets',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: entry.value > Money.zero
+                              ? AppColors.orange500
+                              : AppColors.emerald600,
+                        ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -52,6 +52,15 @@ class PurchaseLot {
       ? 1
       : sales.map((s) => s.billNo).reduce((a, b) => a > b ? a : b) + 1;
 
+  /// Caret balance per customer — how many carets each party owes back.
+  Map<String, Decimal> get caretBalanceByCustomer {
+    final Map<String, Decimal> balances = {};
+    for (final sale in sales) {
+      balances[sale.partyName] = (balances[sale.partyName] ?? Money.zero) + sale.carets;
+    }
+    return balances;
+  }
+
   PurchaseLot copyWith({
     int? srNo,
     DateTime? date,
