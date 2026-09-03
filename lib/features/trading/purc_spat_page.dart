@@ -406,18 +406,18 @@ class _PurchaseTable extends StatelessWidget {
                       onTap: () => onSelected(i)),
                   DataCell(Text(lots[i].partyName), onTap: () => onSelected(i)),
                   DataCell(Text(lots[i].item), onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(lots[i].bags)),
+                  DataCell(Text(Formatters.quantity(lots[i].bags.toDouble())),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(lots[i].soldBags)),
+                  DataCell(Text(Formatters.quantity(lots[i].soldBags.toDouble())),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(lots[i].balanceBags)),
+                  DataCell(Text(Formatters.quantity(lots[i].balanceBags.toDouble())),
                       onTap: () => onSelected(i)),
                   DataCell(
                     Text(
-                        '${Formatters.quantity(lots[i].soldCarets)} / ${Formatters.quantity(lots[i].totalCarets)}'),
+                        '${Formatters.quantity(lots[i].soldCarets.toDouble())} / ${Formatters.quantity(lots[i].totalCarets.toDouble())}'),
                     onTap: () => onSelected(i),
                   ),
-                  DataCell(Text(Formatters.amount(lots[i].saleAmount)),
+                  DataCell(Text(Formatters.amount(lots[i].saleAmount.toDouble())),
                       onTap: () => onSelected(i)),
                 ],
               ),
@@ -494,17 +494,17 @@ class _SalesTable extends StatelessWidget {
                       onTap: () => onSelected(i)),
                   DataCell(Text(sales[i].partyName),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(sales[i].bags)),
+                  DataCell(Text(Formatters.quantity(sales[i].bags.toDouble())),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(sales[i].carets)),
+                  DataCell(Text(Formatters.quantity(sales[i].carets.toDouble())),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(sales[i].weight)),
+                  DataCell(Text(Formatters.quantity(sales[i].weight.toDouble())),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.quantity(sales[i].rate)),
+                  DataCell(Text(Formatters.quantity(sales[i].rate.toDouble())),
                       onTap: () => onSelected(i)),
                   DataCell(Text(sales[i].unit.label),
                       onTap: () => onSelected(i)),
-                  DataCell(Text(Formatters.amount(sales[i].amount)),
+                  DataCell(Text(Formatters.amount(sales[i].amount.toDouble())),
                       onTap: () => onSelected(i)),
                 ],
               ),
@@ -634,9 +634,10 @@ class _PurchaseDialogState extends State<_PurchaseDialog> {
     _party = TextEditingController(text: lot?.partyName ?? '');
     _item = TextEditingController(text: lot?.item ?? '');
     _bags = TextEditingController(
-        text: lot == null ? '' : Formatters.quantity(lot.bags));
+        text: lot == null ? '' : Formatters.quantity(lot.bags.toDouble()),
+    );
     _carets = TextEditingController(
-      text: lot == null ? '0' : Formatters.quantity(lot.totalCarets),
+      text: lot == null ? '0' : Formatters.quantity(lot.totalCarets.toDouble()),
     );
   }
 
