@@ -66,3 +66,7 @@ git push origin main
 - __Build for web__: Run `flutter build web --release`
 
 - __Deploy__: Upload `build/web` to any static hosting (Netlify, Vercel, Firebase Hosting)
+
+
+
+ledger  - changes same entry - pur/spat module same entry - esc come back to same entry

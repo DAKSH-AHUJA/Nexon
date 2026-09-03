@@ -16,7 +16,6 @@ import '../../domain/money.dart';
 import '../../services/purc_spat_provider.dart';
 
 /// Second page: Shows customer details for a selected truck.
-/// Truck details are shown at the top.
 class PurcSpatDetailPage extends ConsumerStatefulWidget {
   const PurcSpatDetailPage({super.key, required this.lotId});
 
@@ -28,7 +27,6 @@ class PurcSpatDetailPage extends ConsumerStatefulWidget {
 
 class _PurcSpatDetailPageState extends ConsumerState<PurcSpatDetailPage> {
   final _salesScroll = ScrollController();
-  int _selectedSaleIndex = 0;
 
   @override
   void dispose() {
@@ -122,6 +120,8 @@ class _PurcSpatDetailPageState extends ConsumerState<PurcSpatDetailPage> {
           Expanded(
             child: lot.sales.isEmpty
                 ? Center(
+                    child: Text(
+                      'No customers added yet.',
 
 class _TruckDetailsCard extends StatelessWidget {
   const _TruckDetailsCard({required this.lot, required this.isDark});
@@ -603,8 +603,6 @@ class _SaleDialogState extends State<_SaleDialog> {
     );
   }
 }
-                    child: Text(
-                      'No customers added yet.',
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   )
