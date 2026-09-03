@@ -251,12 +251,14 @@ class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 _TotalsStrip(totals: totals),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Expanded(
-                  child: Column(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Left side - Truck list
                       Expanded(
                         flex: 5,
                         child: Focus(
@@ -274,7 +276,8 @@ class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(width: 16),
+                      // Right side - Customer sales
                       Expanded(
                         flex: 4,
                         child: Focus(
@@ -294,8 +297,6 @@ class _PurcSpatPageState extends ConsumerState<PurcSpatPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
-                _CaretBalanceSummary(lot: selectedLot),
                 const SizedBox(height: 10),
                 const _ShortcutBar(),
               ],
@@ -779,6 +780,13 @@ class _SaleDialogState extends State<_SaleDialog> {
   late RateUnit _unit;
   String? _selectedMark;
 
+  // Focus nodes for arrow key navigation
+  final _partyFocus = FocusNode();
+  final _bagsFocus = FocusNode();
+  final _caretsFocus = FocusNode();
+  final _weightFocus = FocusNode();
+  final _rateFocus = FocusNode();
+
   static const List<String> _markOptions = ['SVC', 'ARC', 'OTHER'];
 
   ValidationResult _validation = const ValidationResult.valid();
@@ -889,12 +897,21 @@ class _SaleDialogState extends State<_SaleDialog> {
               const SizedBox(height: 12),
               TextField(
                 controller: _party,
+                focusNode: _partyFocus,
                 autofocus: true,
                 decoration: InputDecoration(
                   labelText: 'Party Name',
                   errorText: _validation.messageFor('partyName'),
                 ),
                 textInputAction: TextInputAction.next,
+                onKeyEvent: (node, event) {
+                  if (event is KeyDownEvent &&
+                      event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                    _bagsFocus.requestFocus();
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -921,36 +938,75 @@ class _SaleDialogState extends State<_SaleDialog> {
                   Expanded(
                     child: TextField(
                       controller: _bags,
+                      focusNode: _bagsFocus,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Bags',
                         errorText: _validation.messageFor('bags'),
                       ),
                       textInputAction: TextInputAction.next,
+                      onKeyEvent: (node, event) {
+                        if (event is KeyDownEvent) {
+                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                            _caretsFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                            _partyFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: _carets,
+                      focusNode: _caretsFocus,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Caret',
                         errorText: _validation.messageFor('carets'),
                       ),
                       textInputAction: TextInputAction.next,
+                      onKeyEvent: (node, event) {
+                        if (event is KeyDownEvent) {
+                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                            _weightFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                            _bagsFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: _weight,
+                      focusNode: _weightFocus,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Weight',
                         errorText: _validation.messageFor('weight'),
                       ),
                       textInputAction: TextInputAction.next,
+                      onKeyEvent: (node, event) {
+                        if (event is KeyDownEvent) {
+                          if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                            _rateFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                            _caretsFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
                     ),
                   ),
                 ],
@@ -962,6 +1018,7 @@ class _SaleDialogState extends State<_SaleDialog> {
                   Expanded(
                     child: TextField(
                       controller: _rate,
+                      focusNode: _rateFocus,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         labelText: 'Rate',
@@ -969,6 +1026,15 @@ class _SaleDialogState extends State<_SaleDialog> {
                       ),
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _save(),
+                      onKeyEvent: (node, event) {
+                        if (event is KeyDownEvent) {
+                          if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                            _weightFocus.requestFocus();
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1018,75 +1084,3 @@ class _SaleDialogState extends State<_SaleDialog> {
   }
 }
 
-/// Shows caret balance per customer for the selected lot.
-class _CaretBalanceSummary extends StatelessWidget {
-  const _CaretBalanceSummary({this.lot});
-
-  final PurchaseLot? lot;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final lot = this.lot;
-
-    if (lot == null || lot.sales.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final caretBalances = lot.caretBalanceByCustomer;
-    if (caretBalances.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.lightCard,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Caret Balance — Who owes carets back',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: [
-              for (final entry in caretBalances.entries)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: entry.value > Money.zero
-                        ? AppColors.orange500.withValues(alpha: 0.15)
-                        : AppColors.emerald600.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    '${entry.key}: ${Money.formatQuantity(entry.value)} carets',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: entry.value > Money.zero
-                              ? AppColors.orange500
-                              : AppColors.emerald600,
-                        ),
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
