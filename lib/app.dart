@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'navigation/app_router.dart';
+import 'services/sync_engine.dart';
 import 'widgets/offline_indicator.dart';
 import 'widgets/sync_indicator.dart';
 

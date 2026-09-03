@@ -11,8 +11,8 @@ class Customers extends Table {
   RealColumn get outstandingBalance => real().withDefault(const Constant(0))();
   RealColumn get totalPurchases => real().withDefault(const Constant(0))();
   TextColumn get status => text().withDefault(const Constant('active'))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime())();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
@@ -30,7 +30,7 @@ class Products extends Table {
   RealColumn get sellingPrice => real().withDefault(const Constant(0))();
   RealColumn get minimumStock => real().withDefault(const Constant(0))();
   TextColumn get description => text().withDefault(const Constant(''))();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
@@ -49,7 +49,7 @@ class Suppliers extends Table {
   RealColumn get outstandingPayment => real().withDefault(const Constant(0))();
   RealColumn get totalPurchases => real().withDefault(const Constant(0))();
   TextColumn get status => text().withDefault(const Constant('active'))();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
@@ -66,8 +66,8 @@ class Invoices extends Table {
   RealColumn get totalGst => real().withDefault(const Constant(0))();
   RealColumn get grandTotal => real().withDefault(const Constant(0))();
   TextColumn get status => text().withDefault(const Constant('pending'))();
-  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime())();
-  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
@@ -95,7 +95,7 @@ class InventoryTransactions extends Table {
   TextColumn get productName => text()();
   TextColumn get type => text()();
   RealColumn get quantity => real()();
-  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
   TextColumn get note => text().withDefault(const Constant(''))();
   TextColumn get user => text().withDefault(const Constant('Admin'))();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
@@ -111,7 +111,7 @@ class LedgerEntries extends Table {
   RealColumn get debit => real().withDefault(const Constant(0))();
   RealColumn get credit => real().withDefault(const Constant(0))();
   RealColumn get balance => real()();
-  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
   @override
@@ -125,7 +125,7 @@ class CaretEntries extends Table {
   TextColumn get partyName => text()();
   TextColumn get type => text()();
   IntColumn get quantity => integer()();
-  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
   TextColumn get referenceNumber => text().nullable()();
   IntColumn get syncStatus => integer().withDefault(const Constant(0))();
 
@@ -162,15 +162,15 @@ class SaleLines extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-class SyncQueue extends Table {
+class SyncQueueTable extends Table {
   TextColumn get id => text().clientDefault(() => 'sync_${DateTime.now().millisecondsSinceEpoch}')();
-  TextColumn get tableName => text()();
+  TextColumn get tableNameCol => text()();
   TextColumn get recordId => text()();
   TextColumn get operation => text()();
   TextColumn get data => text()();
   TextColumn get status => text().withDefault(const Constant('pending'))();
   IntColumn get retryCount => integer().withDefault(const Constant(0))();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime())();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get syncedAt => dateTime().nullable()();
 
   @override
