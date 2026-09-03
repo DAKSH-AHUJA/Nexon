@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/login_page.dart';
 import '../features/trading/classic_trading_pages.dart';
 import '../features/trading/purc_spat_page.dart';
+import '../features/trading/purc_spat_detail_page.dart';
 import '../services/auth_service.dart';
 import 'shell_scaffold.dart';
 
@@ -47,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           _shellRoute(
             '/data-entry/purc-spat',
             const PurcSpatPage(),
+          ),
+          _shellRoute(
+            '/data-entry/purc-spat/:lotId',
+            const PurcSpatDetailPage(),
           ),
           _shellRoute(
               '/data-entry/sale', const TradingFeaturePage(title: 'Sale')),

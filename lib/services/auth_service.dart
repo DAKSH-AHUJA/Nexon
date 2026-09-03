@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CompanyAccount {
   const CompanyAccount({
@@ -19,6 +20,24 @@ class CompanyAccount {
   final String passwordDigest;
   final String businessType;
   final String gst;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'accountCode': accountCode,
+        'passwordDigest': passwordDigest,
+        'businessType': businessType,
+        'gst': gst,
+      };
+
+  factory CompanyAccount.fromJson(Map<String, dynamic> json) => CompanyAccount(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        accountCode: json['accountCode'] as String,
+        passwordDigest: json['passwordDigest'] as String,
+        businessType: json['businessType'] as String,
+        gst: json['gst'] as String,
+      );
 }
 
 class AuthState {
@@ -77,9 +96,37 @@ const companyAccounts = [
 ];
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState());
+  AuthNotifier() : super(const AuthState()) {
+    _loadSession();
+  }
+
+  static const _sessionKey = 'nexon_auth_session';
 
   List<CompanyAccount> get accounts => companyAccounts;
+
+  Future<void> _loadSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionJson = prefs.getString(_sessionKey);
+    if (sessionJson != null) {
+      try {
+        final json = jsonDecode(sessionJson) as Map<String, dynamic>;
+        final company = CompanyAccount.fromJson(json);
+        state = AuthState(currentCompany: company);
+      } catch (_) {
+        await prefs.remove(_sessionKey);
+      }
+    }
+  }
+
+  Future<void> _saveSession(CompanyAccount company) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_sessionKey, jsonEncode(company.toJson()));
+  }
+
+  Future<void> _clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_sessionKey);
+  }
 
   bool login({required String accountCode, required String password}) {
     final normalizedCode = accountCode.trim().toLowerCase();
@@ -97,10 +144,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
 
     state = AuthState(currentCompany: company);
+    _saveSession(company);
     return true;
   }
 
-  void logout() => state = const AuthState();
+  void logout() {
+    state = const AuthState();
+    _clearSession();
+  }
 }
 
 bool _constantTimeEquals(String left, String right) {
