@@ -1,0 +1,20 @@
+lib\main.dart:6:import 'services/supabase_service.dart';
+lib\main.dart:17:  // Initialize Supabase (optional - app works offline without it)
+lib\main.dart:19:    await initSupabase();
+lib\main.dart:21:    // App still works offline without Supabase
+lib\main.dart:22:    debugPrint('Supabase init failed: $e');
+lib\services\supabase_service.dart:1:import 'package:supabase_flutter/supabase_flutter.dart';
+lib\services\supabase_service.dart:6:// Supabase configuration
+lib\services\supabase_service.dart:7:class SupabaseConfig {
+lib\services\supabase_service.dart:9:    'SUPABASE_URL',
+lib\services\supabase_service.dart:10:    defaultValue: 'https://your-project.supabase.co',
+lib\services\supabase_service.dart:13:    'SUPABASE_ANON_KEY',
+lib\services\supabase_service.dart:18:// Initialize Supabase
+lib\services\supabase_service.dart:19:Future<void> initSupabase() async {
+lib\services\supabase_service.dart:20:  await Supabase.initialize(
+lib\services\supabase_service.dart:21:    url: SupabaseConfig.url,
+lib\services\supabase_service.dart:22:    anonKey: SupabaseConfig.anonKey,
+lib\services\supabase_service.dart:26:// Supabase client provider
+lib\services\supabase_service.dart:27:final supabaseClientProvider = Provider<SupabaseClient>((ref) {
+lib\services\supabase_service.dart:28:  return Supabase.instance.client;
+lib\services\sync_engine.dart:7:import 'supabase_service.dart';

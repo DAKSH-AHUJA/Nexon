@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:drift/web.dart';
 
+import 'connection/connection.dart';
 import 'tables.dart';
 
 part 'database.g.dart';
@@ -35,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   static QueryExecutor _openConnection() {
-    return WebDatabase('nexon_erp_db');
+    return openConnection();
   }
 
   // Sync queue operations

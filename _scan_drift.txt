@@ -1,0 +1,248 @@
+lib\database\database.dart:1:import 'package:drift/drift.dart';
+lib\database\database.dart:2:import 'package:drift/web.dart';
+lib\database\database.dart:8:@DriftDatabase(tables: [
+lib\database\database.g.dart:16:      type: DriftSqlType.string,
+lib\database\database.g.dart:23:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:28:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:33:      type: DriftSqlType.string,
+lib\database\database.g.dart:40:      type: DriftSqlType.string,
+lib\database\database.g.dart:48:      type: DriftSqlType.string,
+lib\database\database.g.dart:55:      type: DriftSqlType.string,
+lib\database\database.g.dart:63:          type: DriftSqlType.double,
+lib\database\database.g.dart:71:      type: DriftSqlType.double,
+lib\database\database.g.dart:78:      type: DriftSqlType.string,
+lib\database\database.g.dart:86:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:94:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:102:      type: DriftSqlType.bool,
+lib\database\database.g.dart:112:      type: DriftSqlType.int,
+lib\database\database.g.dart:217:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:219:          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+lib\database\database.g.dart:221:          .read(DriftSqlType.string, data['${effectivePrefix}phone'])!,
+lib\database\database.g.dart:223:          .read(DriftSqlType.string, data['${effectivePrefix}email'])!,
+lib\database\database.g.dart:225:          .read(DriftSqlType.string, data['${effectivePrefix}gst'])!,
+lib\database\database.g.dart:227:          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
+lib\database\database.g.dart:229:          .read(DriftSqlType.string, data['${effectivePrefix}city'])!,
+lib\database\database.g.dart:231:          DriftSqlType.double, data['${effectivePrefix}outstanding_balance'])!,
+lib\database\database.g.dart:233:          DriftSqlType.double, data['${effectivePrefix}total_purchases'])!,
+lib\database\database.g.dart:235:          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+lib\database\database.g.dart:237:          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+lib\database\database.g.dart:239:          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+lib\database\database.g.dart:241:          .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
+lib\database\database.g.dart:243:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:324:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:345:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:681:      type: DriftSqlType.string,
+lib\database\database.g.dart:688:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:694:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:699:      type: DriftSqlType.string,
+lib\database\database.g.dart:707:      type: DriftSqlType.double,
+lib\database\database.g.dart:715:      type: DriftSqlType.double,
+lib\database\database.g.dart:723:      type: DriftSqlType.double,
+lib\database\database.g.dart:731:      type: DriftSqlType.double,
+lib\database\database.g.dart:739:      type: DriftSqlType.string,
+lib\database\database.g.dart:747:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:755:      type: DriftSqlType.bool,
+lib\database\database.g.dart:765:      type: DriftSqlType.int,
+lib\database\database.g.dart:866:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:868:          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+lib\database\database.g.dart:870:          .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
+lib\database\database.g.dart:872:          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+lib\database\database.g.dart:874:          .read(DriftSqlType.double, data['${effectivePrefix}current_stock'])!,
+lib\database\database.g.dart:876:          .read(DriftSqlType.double, data['${effectivePrefix}purchase_price'])!,
+lib\database\database.g.dart:878:          .read(DriftSqlType.double, data['${effectivePrefix}selling_price'])!,
+lib\database\database.g.dart:880:          .read(DriftSqlType.double, data['${effectivePrefix}minimum_stock'])!,
+lib\database\database.g.dart:882:          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+lib\database\database.g.dart:884:          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+lib\database\database.g.dart:886:          .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
+lib\database\database.g.dart:888:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:961:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:979:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:1285:      type: DriftSqlType.string,
+lib\database\database.g.dart:1292:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:1297:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:1302:      type: DriftSqlType.string,
+lib\database\database.g.dart:1309:      type: DriftSqlType.string,
+lib\database\database.g.dart:1317:      type: DriftSqlType.string,
+lib\database\database.g.dart:1324:      type: DriftSqlType.string,
+lib\database\database.g.dart:1332:          type: DriftSqlType.double,
+lib\database\database.g.dart:1340:      type: DriftSqlType.double,
+lib\database\database.g.dart:1347:      type: DriftSqlType.string,
+lib\database\database.g.dart:1355:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:1363:      type: DriftSqlType.bool,
+lib\database\database.g.dart:1373:      type: DriftSqlType.int,
+lib\database\database.g.dart:1473:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:1475:          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+lib\database\database.g.dart:1477:          .read(DriftSqlType.string, data['${effectivePrefix}phone'])!,
+lib\database\database.g.dart:1479:          .read(DriftSqlType.string, data['${effectivePrefix}email'])!,
+lib\database\database.g.dart:1481:          .read(DriftSqlType.string, data['${effectivePrefix}gst'])!,
+lib\database\database.g.dart:1483:          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
+lib\database\database.g.dart:1485:          .read(DriftSqlType.string, data['${effectivePrefix}city'])!,
+lib\database\database.g.dart:1487:          DriftSqlType.double, data['${effectivePrefix}outstanding_payment'])!,
+lib\database\database.g.dart:1489:          DriftSqlType.double, data['${effectivePrefix}total_purchases'])!,
+lib\database\database.g.dart:1491:          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+lib\database\database.g.dart:1493:          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+lib\database\database.g.dart:1495:          .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
+lib\database\database.g.dart:1497:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:1574:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:1594:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:1912:      type: DriftSqlType.string,
+lib\database\database.g.dart:1920:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:1926:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:1932:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:1938:      type: DriftSqlType.double,
+lib\database\database.g.dart:1946:      type: DriftSqlType.double,
+lib\database\database.g.dart:1954:      type: DriftSqlType.double,
+lib\database\database.g.dart:1961:      type: DriftSqlType.string,
+lib\database\database.g.dart:1968:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:1976:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:1984:      type: DriftSqlType.bool,
+lib\database\database.g.dart:1994:      type: DriftSqlType.int,
+lib\database\database.g.dart:2093:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:2095:          .read(DriftSqlType.string, data['${effectivePrefix}invoice_no'])!,
+lib\database\database.g.dart:2097:          .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
+lib\database\database.g.dart:2099:          .read(DriftSqlType.string, data['${effectivePrefix}customer_name'])!,
+lib\database\database.g.dart:2101:          .read(DriftSqlType.double, data['${effectivePrefix}subtotal'])!,
+lib\database\database.g.dart:2103:          .read(DriftSqlType.double, data['${effectivePrefix}total_gst'])!,
+lib\database\database.g.dart:2105:          .read(DriftSqlType.double, data['${effectivePrefix}grand_total'])!,
+lib\database\database.g.dart:2107:          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+lib\database\database.g.dart:2109:          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+lib\database\database.g.dart:2111:          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+lib\database\database.g.dart:2113:          .read(DriftSqlType.bool, data['${effectivePrefix}is_deleted'])!,
+lib\database\database.g.dart:2115:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:2188:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:2206:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:2508:      type: DriftSqlType.string,
+lib\database\database.g.dart:2516:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:2522:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:2528:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:2534:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:2539:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:2545:      type: DriftSqlType.double,
+lib\database\database.g.dart:2553:      type: DriftSqlType.double,
+lib\database\database.g.dart:2630:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:2632:          .read(DriftSqlType.string, data['${effectivePrefix}invoice_id'])!,
+lib\database\database.g.dart:2634:          .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
+lib\database\database.g.dart:2636:          .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
+lib\database\database.g.dart:2638:          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
+lib\database\database.g.dart:2640:          .read(DriftSqlType.double, data['${effectivePrefix}price'])!,
+lib\database\database.g.dart:2642:          .read(DriftSqlType.double, data['${effectivePrefix}discount'])!,
+lib\database\database.g.dart:2644:          .read(DriftSqlType.double, data['${effectivePrefix}gst_rate'])!,
+lib\database\database.g.dart:2701:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:2715:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:2936:      type: DriftSqlType.string,
+lib\database\database.g.dart:2944:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:2950:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:2955:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:2961:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:2966:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:2973:      type: DriftSqlType.string,
+lib\database\database.g.dart:2980:      type: DriftSqlType.string,
+lib\database\database.g.dart:2988:      type: DriftSqlType.int,
+lib\database\database.g.dart:3071:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:3073:          .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
+lib\database\database.g.dart:3075:          .read(DriftSqlType.string, data['${effectivePrefix}product_name'])!,
+lib\database\database.g.dart:3077:          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+lib\database\database.g.dart:3079:          .read(DriftSqlType.double, data['${effectivePrefix}quantity'])!,
+lib\database\database.g.dart:3081:          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+lib\database\database.g.dart:3083:          .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
+lib\database\database.g.dart:3085:          .read(DriftSqlType.string, data['${effectivePrefix}user'])!,
+lib\database\database.g.dart:3087:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:3149:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:3164:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:3403:      type: DriftSqlType.string,
+lib\database\database.g.dart:3411:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:3417:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:3422:      type: DriftSqlType.double,
+lib\database\database.g.dart:3429:      type: DriftSqlType.double,
+lib\database\database.g.dart:3437:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:3442:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:3450:      type: DriftSqlType.int,
+lib\database\database.g.dart:3519:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:3521:          .read(DriftSqlType.string, data['${effectivePrefix}customer_id'])!,
+lib\database\database.g.dart:3523:          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+lib\database\database.g.dart:3525:          .read(DriftSqlType.double, data['${effectivePrefix}debit'])!,
+lib\database\database.g.dart:3527:          .read(DriftSqlType.double, data['${effectivePrefix}credit'])!,
+lib\database\database.g.dart:3529:          .read(DriftSqlType.double, data['${effectivePrefix}balance'])!,
+lib\database\database.g.dart:3531:          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+lib\database\database.g.dart:3533:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:3590:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:3604:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:3825:      type: DriftSqlType.string,
+lib\database\database.g.dart:3833:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:3839:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:3845:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:3850:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:3855:      type: DriftSqlType.string,
+lib\database\database.g.dart:3863:      type: DriftSqlType.int,
+lib\database\database.g.dart:3871:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:3879:      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+lib\database\database.g.dart:3959:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:3961:          .read(DriftSqlType.string, data['${effectivePrefix}table_name_col'])!,
+lib\database\database.g.dart:3963:          .read(DriftSqlType.string, data['${effectivePrefix}record_id'])!,
+lib\database\database.g.dart:3965:          .read(DriftSqlType.string, data['${effectivePrefix}operation'])!,
+lib\database\database.g.dart:3967:          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+lib\database\database.g.dart:3969:          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+lib\database\database.g.dart:3971:          .read(DriftSqlType.int, data['${effectivePrefix}retry_count'])!,
+lib\database\database.g.dart:3973:          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+lib\database\database.g.dart:3975:          .read(DriftSqlType.dateTime, data['${effectivePrefix}synced_at']),
+lib\database\database.g.dart:4041:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:4056:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:4295:      type: DriftSqlType.string,
+lib\database\database.g.dart:4303:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:4309:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:4315:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:4320:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:4326:      type: DriftSqlType.int, requiredDuringInsert: true);
+lib\database\database.g.dart:4331:      type: DriftSqlType.dateTime,
+lib\database\database.g.dart:4339:      type: DriftSqlType.string, requiredDuringInsert: false);
+lib\database\database.g.dart:4345:      type: DriftSqlType.int,
+lib\database\database.g.dart:4429:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:4431:          .read(DriftSqlType.string, data['${effectivePrefix}company_id'])!,
+lib\database\database.g.dart:4433:          .read(DriftSqlType.string, data['${effectivePrefix}party_id'])!,
+lib\database\database.g.dart:4435:          .read(DriftSqlType.string, data['${effectivePrefix}party_name'])!,
+lib\database\database.g.dart:4437:          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
+lib\database\database.g.dart:4439:          .read(DriftSqlType.int, data['${effectivePrefix}quantity'])!,
+lib\database\database.g.dart:4441:          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+lib\database\database.g.dart:4443:          DriftSqlType.string, data['${effectivePrefix}reference_number']),
+lib\database\database.g.dart:4445:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:4510:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:4525:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:4767:      type: DriftSqlType.string,
+lib\database\database.g.dart:4774:      type: DriftSqlType.int, requiredDuringInsert: true);
+lib\database\database.g.dart:4779:      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+lib\database\database.g.dart:4785:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:4790:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:4795:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:4801:      type: DriftSqlType.double,
+lib\database\database.g.dart:4809:      type: DriftSqlType.int,
+lib\database\database.g.dart:4880:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:4882:          .read(DriftSqlType.int, data['${effectivePrefix}sr_no'])!,
+lib\database\database.g.dart:4884:          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+lib\database\database.g.dart:4886:          .read(DriftSqlType.string, data['${effectivePrefix}party_name'])!,
+lib\database\database.g.dart:4888:          .read(DriftSqlType.string, data['${effectivePrefix}item'])!,
+lib\database\database.g.dart:4890:          .read(DriftSqlType.double, data['${effectivePrefix}bags'])!,
+lib\database\database.g.dart:4892:          .read(DriftSqlType.double, data['${effectivePrefix}total_carets'])!,
+lib\database\database.g.dart:4894:          .read(DriftSqlType.int, data['${effectivePrefix}sync_status'])!,
+lib\database\database.g.dart:4951:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:4965:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:5187:      type: DriftSqlType.string,
+lib\database\database.g.dart:5194:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:5199:      type: DriftSqlType.int, requiredDuringInsert: true);
+lib\database\database.g.dart:5204:      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+lib\database\database.g.dart:5210:      type: DriftSqlType.string, requiredDuringInsert: true);
+lib\database\database.g.dart:5215:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:5220:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:5225:      type: DriftSqlType.double, requiredDuringInsert: true);
+lib\database\database.g.dart:5230:      type: DriftSqlType.string,
+lib\database\database.g.dart:5305:          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+lib\database\database.g.dart:5307:          .read(DriftSqlType.string, data['${effectivePrefix}lot_id'])!,
+lib\database\database.g.dart:5309:          .read(DriftSqlType.int, data['${effectivePrefix}bill_no'])!,
+lib\database\database.g.dart:5311:          .read(DriftSqlType.dateTime, data['${effectivePrefix}date'])!,
+lib\database\database.g.dart:5313:          .read(DriftSqlType.string, data['${effectivePrefix}party_name'])!,
+lib\database\database.g.dart:5315:          .read(DriftSqlType.double, data['${effectivePrefix}bags'])!,
+lib\database\database.g.dart:5317:          .read(DriftSqlType.double, data['${effectivePrefix}weight'])!,
+lib\database\database.g.dart:5319:          .read(DriftSqlType.double, data['${effectivePrefix}rate'])!,
+lib\database\database.g.dart:5321:          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+lib\database\database.g.dart:5382:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\database.g.dart:5397:    serializer ??= driftRuntimeOptions.defaultSerializer;
+lib\database\tables.dart:1:import 'package:drift/drift.dart';

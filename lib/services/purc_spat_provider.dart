@@ -25,6 +25,25 @@ class PurcSpatNotifier extends StateNotifier<List<PurchaseLot>> {
         for (final existing in state) existing.id == lot.id ? lot : existing,
       ];
 
+  /// Removes a truck lot entirely.
+  void removeLot(String lotId) => state = [
+        for (final existing in state)
+          if (existing.id != lotId) existing
+      ];
+
+  /// Removes a sale line; its bags and carets return to the truck balance.
+  void removeSale(String lotId, String saleId) {
+    final lot = state.firstWhere((l) => l.id == lotId);
+    replaceLot(
+      lot.copyWith(
+        sales: [
+          for (final sale in lot.sales)
+            if (sale.id != saleId) sale
+        ],
+      ),
+    );
+  }
+
   /// Appends a sale to [lotId]. Rejected when it would oversell the truck, so
   /// the invariant holds even if a caller skips the form validation.
   ValidationResult addSale(String lotId, SaleLine sale) {

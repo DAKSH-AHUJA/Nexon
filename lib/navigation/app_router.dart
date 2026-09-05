@@ -49,9 +49,15 @@ final routerProvider = Provider<GoRouter>((ref) {
             '/data-entry/purc-spat',
             const PurcSpatPage(),
           ),
-          _shellRoute(
-            '/data-entry/purc-spat/:lotId',
-            const PurcSpatDetailPage(),
+          GoRoute(
+            path: '/data-entry/purc-spat/:lotId',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: PurcSpatDetailPage(
+                lotId: state.pathParameters['lotId'] ?? '',
+              ),
+              transitionsBuilder: _slideTransition,
+            ),
           ),
           _shellRoute(
               '/data-entry/sale', const TradingFeaturePage(title: 'Sale')),
